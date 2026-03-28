@@ -1,0 +1,65 @@
+# ===============================
+# Docker Ignore File
+# ===============================
+# Files and directories to exclude from Docker build context
+# Keeps build fast and image size small
+# ===============================
+
+# Dependencies (will be installed fresh)
+node_modules
+
+# Nuxt build outputs (will be rebuilt)
+.nuxt
+.output
+.data
+.nitro
+.cache
+dist
+
+# Git
+.git
+.gitignore
+
+# Environment files (use build args or runtime env)
+.env
+.env.*
+!.env.example
+
+# IDE / Editor
+.idea
+.vscode
+*.sublime-*
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation (not needed in container)
+docs/
+*.md
+!README.md
+
+# Testing
+coverage
+*.lcov
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Development files
+*.log
+*.local
+
+# AI instruction files
+.ai/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Misc
+.eslintcache
+.prettierignore
+LICENSE

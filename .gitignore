@@ -1,0 +1,106 @@
+# ===============================
+# Nuxt Build Outputs
+# ===============================
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# ===============================
+# Dependencies
+# ===============================
+node_modules
+
+# ===============================
+# Logs
+# ===============================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ===============================
+# Environment Variables
+# ===============================
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+!.env.example
+
+# ===============================
+# IDE / Editor
+# ===============================
+.idea
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
+
+# ===============================
+# OS Files
+# ===============================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ===============================
+# Testing / Coverage
+# ===============================
+coverage
+*.lcov
+.nyc_output
+
+# ===============================
+# TypeScript
+# ===============================
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# ===============================
+# PWA / Service Workers
+# ===============================
+sw.*
+workbox-*
+
+# ===============================
+# Hosting Platforms
+# ===============================
+.netlify
+.vercel
+
+# ===============================
+# Supabase
+# ===============================
+supabase/.temp
+supabase/.branches
+
+# ===============================
+# Docker
+# ===============================
+docker-compose.override.yml
+
+# ===============================
+# Misc
+# ===============================
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.local
+*.backup
