@@ -46,6 +46,8 @@ const breadcrumbs = computed(() => [
   { label: order.value?.number || 'Pedido', to: `/admin/vendas/${orderId.value}` },
   { label: 'Editar' },
 ])
+
+const notifyFormPlaceholder = usePlaceholderSubmit()
 </script>
 
 <template>
@@ -81,6 +83,7 @@ const breadcrumbs = computed(() => [
         <button
           type="button"
           class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white"
+          @click="notifyFormPlaceholder"
         >
           Aplicar alterações (placeholder)
         </button>

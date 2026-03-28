@@ -1,6 +1,12 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin' })
 useHead({ title: 'Exportar financeiro' })
+
+const { info: toastInfo } = useToast()
+
+function onExportClick() {
+  toastInfo('Exportação em desenvolvimento', 'Planilhas de lançamentos e contas serão geradas em breve.')
+}
 </script>
 
 <template>
@@ -26,6 +32,7 @@ useHead({ title: 'Exportar financeiro' })
       <button
         type="button"
         class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white"
+        @click="onExportClick"
       >
         Gerar exportação (placeholder)
       </button>

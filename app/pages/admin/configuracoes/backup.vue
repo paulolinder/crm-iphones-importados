@@ -1,6 +1,16 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin' })
 useHead({ title: 'Backup — Configurações' })
+
+const { info: toastInfo, warning: toastWarning } = useToast()
+
+function onSampleCsvClick() {
+  toastInfo('Em breve', 'Download de amostra CSV será disponibilizado quando o backup estiver integrado.')
+}
+
+function onRestrictedClick() {
+  toastWarning('Zona restrita', 'Operações destrutivas só via painel Supabase ou administrador de infraestrutura.')
+}
 </script>
 
 <template>
@@ -25,12 +35,14 @@ useHead({ title: 'Backup — Configurações' })
         <button
           type="button"
           class="px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50"
+          @click="onSampleCsvClick"
         >
           Baixar amostra CSV
         </button>
         <button
           type="button"
           class="px-4 py-2.5 rounded-xl text-sm font-semibold border border-red-200 text-red-700 hover:bg-red-50"
+          @click="onRestrictedClick"
         >
           Zona restrita
         </button>

@@ -8,6 +8,8 @@ const userId = computed(() => {
 })
 
 useHead({ title: 'Editar usuário' })
+
+const notifyFormPlaceholder = usePlaceholderSubmit()
 </script>
 
 <template>
@@ -45,6 +47,7 @@ useHead({ title: 'Editar usuário' })
       <button
         type="button"
         class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white"
+        @click="notifyFormPlaceholder"
       >
         Salvar alterações (placeholder)
       </button>

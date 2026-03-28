@@ -1,6 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin' })
 useHead({ title: 'Ajustes de estoque' })
+
+const notifyFormPlaceholder = usePlaceholderSubmit()
 </script>
 
 <template>
@@ -27,6 +29,7 @@ useHead({ title: 'Ajustes de estoque' })
       <button
         type="button"
         class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white"
+        @click="notifyFormPlaceholder"
       >
         Registrar ajuste (placeholder)
       </button>

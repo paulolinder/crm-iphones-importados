@@ -1,6 +1,12 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin' })
 useHead({ title: 'Exportar vendas' })
+
+const { info: toastInfo } = useToast()
+
+function onExportClick() {
+  toastInfo('Exportação em desenvolvimento', 'Arquivo de vendas filtradas será gerado em breve.')
+}
 </script>
 
 <template>
@@ -27,6 +33,7 @@ useHead({ title: 'Exportar vendas' })
       <button
         type="button"
         class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-500 text-white"
+        @click="onExportClick"
       >
         Gerar arquivo (placeholder)
       </button>

@@ -16,7 +16,26 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const { collapsed, mobileOpen, toggle, closeMobile } = useSidebar()
+const { signOut } = useAuth()
 const route = useRoute()
+const loggingOut = ref(false)
+
+async function handleSignOut() {
+  if (loggingOut.value) {
+    return
+  }
+  loggingOut.value = true
+  closeMobile()
+  try {
+    await signOut()
+  }
+  catch (error) {
+    console.error('Erro ao sair:', error)
+  }
+  finally {
+    loggingOut.value = false
+  }
+}
 
 const menuGroups = [
   {
@@ -287,7 +306,13 @@ const sidebarClasses = computed(() => {
           <p class="text-sm font-medium text-white truncate">Administrador</p>
           <p class="text-xs text-slate-400 truncate">admin@eleve.com</p>
         </div>
-        <button class="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+        <button
+          type="button"
+          class="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50"
+          :disabled="loggingOut"
+          :title="loggingOut ? 'Saindo…' : 'Sair da conta'"
+          @click="handleSignOut"
+        >
           <Icon name="lucide:log-out" class="w-4 h-4" />
         </button>
       </div>

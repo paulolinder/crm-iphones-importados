@@ -1,6 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin' })
 useHead({ title: 'Saída de estoque' })
+
+const notifyFormPlaceholder = usePlaceholderSubmit()
 </script>
 
 <template>
@@ -27,6 +29,7 @@ useHead({ title: 'Saída de estoque' })
       <button
         type="button"
         class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-500 text-white"
+        @click="notifyFormPlaceholder"
       >
         Confirmar saída (placeholder)
       </button>

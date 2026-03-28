@@ -1,6 +1,12 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin' })
 useHead({ title: 'Notificações — Configurações' })
+
+const { info: toastInfo } = useToast()
+
+function onToggleSoon(label: string) {
+  toastInfo('Preferência em desenvolvimento', `A opção "${label}" será persistida em breve.`)
+}
 </script>
 
 <template>
@@ -34,6 +40,7 @@ useHead({ title: 'Notificações — Configurações' })
         <button
           type="button"
           class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600"
+          @click="onToggleSoon(row.t)"
         >
           Em breve
         </button>

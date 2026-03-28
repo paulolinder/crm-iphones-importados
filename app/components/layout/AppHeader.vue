@@ -14,7 +14,9 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const { collapsed, openMobile } = useSidebar()
+const { signOut } = useAuth()
 const showUserMenu = ref(false)
+const loggingOut = ref(false)
 const showNotifications = ref(false)
 const showSearch = ref(false)
 const searchQuery = ref('')
@@ -72,6 +74,12 @@ const notifications = ref([
 
 const unreadCount = computed(() => notifications.value.filter(n => !n.read).length)
 
+function markAllNotificationsRead() {
+  for (const n of notifications.value) {
+    n.read = true
+  }
+}
+
 const headerClasses = computed(() => {
   if (props.isMobile) {
     return 'left-0'
@@ -84,6 +92,23 @@ const quickActions = [
   { icon: 'lucide:user-plus', label: 'Novo Cliente', to: '/admin/clientes/novo', color: 'emerald' },
   { icon: 'lucide:package-plus', label: 'Novo Produto', to: '/admin/produtos/novo', color: 'purple' },
 ]
+
+async function handleSignOut() {
+  if (loggingOut.value) {
+    return
+  }
+  loggingOut.value = true
+  showUserMenu.value = false
+  try {
+    await signOut()
+  }
+  catch (error) {
+    console.error('Erro ao sair:', error)
+  }
+  finally {
+    loggingOut.value = false
+  }
+}
 </script>
 
 <template>
@@ -180,7 +205,11 @@ const quickActions = [
                 <h3 class="text-sm font-semibold text-slate-900">Notificações</h3>
                 <p class="text-xs text-slate-500 mt-0.5">{{ unreadCount }} não lidas</p>
               </div>
-              <button class="text-xs text-blue-600 hover:text-blue-700 font-medium">
+              <button
+                type="button"
+                class="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                @click="markAllNotificationsRead"
+              >
                 Marcar todas como lidas
               </button>
             </div>
@@ -311,9 +340,14 @@ const quickActions = [
 
             <!-- Logout -->
             <div class="border-t border-slate-100 py-2">
-              <button class="flex items-center gap-3 px-5 py-2.5 w-full text-sm text-red-600 hover:bg-red-50 transition-colors">
+              <button
+                type="button"
+                class="flex items-center gap-3 px-5 py-2.5 w-full text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                :disabled="loggingOut"
+                @click="handleSignOut"
+              >
                 <Icon name="lucide:log-out" class="w-4 h-4" />
-                Sair da conta
+                {{ loggingOut ? 'Saindo…' : 'Sair da conta' }}
               </button>
             </div>
           </div>

@@ -97,6 +97,16 @@ const settingsGroups = [
   },
 ]
 
+const { info: toastInfo, warning: toastWarning } = useToast()
+
+function onClearCacheClick() {
+  toastInfo('Em breve', 'Limpeza de cache será integrada à aplicação.')
+}
+
+function onResetSettingsClick() {
+  toastWarning('Não disponível', 'Reset global de configurações não está habilitado neste ambiente.')
+}
+
 const colorClasses: Record<string, { bg: string; icon: string; hover: string }> = {
   blue: { bg: 'bg-blue-50', icon: 'text-blue-600', hover: 'group-hover:bg-blue-100' },
   violet: { bg: 'bg-violet-50', icon: 'text-violet-600', hover: 'group-hover:bg-violet-100' },
@@ -155,10 +165,18 @@ const colorClasses: Record<string, { bg: string; icon: string; hover: string }> 
         Ações irreversíveis que afetam todo o sistema.
       </p>
       <div class="flex flex-wrap gap-3">
-        <button class="px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition-colors">
+        <button
+          type="button"
+          class="px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
+          @click="onClearCacheClick"
+        >
           Limpar Cache
         </button>
-        <button class="px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition-colors">
+        <button
+          type="button"
+          class="px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
+          @click="onResetSettingsClick"
+        >
           Resetar Configurações
         </button>
       </div>

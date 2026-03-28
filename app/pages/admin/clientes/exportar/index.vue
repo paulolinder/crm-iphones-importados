@@ -1,6 +1,12 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin' })
 useHead({ title: 'Exportar clientes' })
+
+const { info: toastInfo } = useToast()
+
+function onExportCsvClick() {
+  toastInfo('Exportação em desenvolvimento', 'CSV com filtros será gerado a partir dos dados reais em breve.')
+}
 </script>
 
 <template>
@@ -25,6 +31,7 @@ useHead({ title: 'Exportar clientes' })
       <button
         type="button"
         class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-500 text-white"
+        @click="onExportCsvClick"
       >
         Gerar CSV (placeholder)
       </button>

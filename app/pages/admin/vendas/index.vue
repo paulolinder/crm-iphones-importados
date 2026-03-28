@@ -225,9 +225,13 @@ onMounted(async () => {
               >
                 <Icon name="lucide:eye" class="w-4 h-4" />
               </NuxtLink>
-              <button class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-                <Icon name="lucide:more-horizontal" class="w-4 h-4" />
-              </button>
+              <NuxtLink
+                :to="`/admin/vendas/${order.id}/editar`"
+                class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                title="Editar pedido"
+              >
+                <Icon name="lucide:pencil" class="w-4 h-4" />
+              </NuxtLink>
             </div>
           </div>
         </div>

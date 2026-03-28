@@ -18,6 +18,19 @@ interface Props {
 withDefaults(defineProps<Props>(), {
   compact: false,
 })
+
+const { info: toastInfo } = useToast()
+
+function runHeaderAction(action: HeaderAction) {
+  if (action.disabled) {
+    return
+  }
+  if (action.onClick) {
+    action.onClick()
+    return
+  }
+  toastInfo('Em breve', 'Esta ação ainda não está disponível nesta tela.')
+}
 </script>
 
 <template>
@@ -86,7 +99,7 @@ withDefaults(defineProps<Props>(), {
               action.variant === 'ghost' ? 'text-slate-600 hover:bg-slate-100' : '',
               !action.variant ? 'border border-slate-200 text-slate-700 hover:bg-slate-50' : '',
             ]"
-            @click="action.onClick"
+            @click="runHeaderAction(action)"
           >
             <Icon v-if="action.icon" :name="action.icon" class="w-4 h-4" />
             {{ action.label }}

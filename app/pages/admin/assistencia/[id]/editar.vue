@@ -8,6 +8,8 @@ const osId = computed(() => {
 })
 
 useHead({ title: 'Editar OS' })
+
+const notifyFormPlaceholder = usePlaceholderSubmit()
 </script>
 
 <template>
@@ -35,6 +37,7 @@ useHead({ title: 'Editar OS' })
       <button
         type="button"
         class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white"
+        @click="notifyFormPlaceholder"
       >
         Salvar (placeholder)
       </button>

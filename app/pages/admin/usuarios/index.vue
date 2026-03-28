@@ -90,9 +90,13 @@ const statusColors: Record<string, string> = {
               :class="statusColors[user.status]"
             />
           </div>
-          <button class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-            <Icon name="lucide:more-horizontal" class="w-5 h-5" />
-          </button>
+          <NuxtLink
+            :to="`/admin/usuarios/${user.id}`"
+            class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            title="Abrir perfil"
+          >
+            <Icon name="lucide:external-link" class="w-5 h-5" />
+          </NuxtLink>
         </div>
 
         <div class="mb-4">

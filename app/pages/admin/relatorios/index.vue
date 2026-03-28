@@ -46,6 +46,17 @@ const reportCategories = [
   },
 ]
 
+const { info: toastInfo } = useToast()
+
+function reportActionSoon(reportTitle: string, kind: 'view' | 'pdf') {
+  toastInfo(
+    'Relatório em desenvolvimento',
+    kind === 'pdf'
+      ? `Geração de PDF de "${reportTitle}" em breve.`
+      : `Visualização de "${reportTitle}" em breve.`,
+  )
+}
+
 const colorClasses: Record<string, { bg: string; text: string; border: string }> = {
   blue: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-100' },
   emerald: { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100' },
@@ -124,10 +135,18 @@ const colorClasses: Record<string, { bg: string; text: string; border: string }>
               </div>
             </div>
             <div class="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-slate-50">
-              <button class="text-xs text-slate-500 hover:text-slate-700 font-medium">
+              <button
+                type="button"
+                class="text-xs text-slate-500 hover:text-slate-700 font-medium"
+                @click="reportActionSoon(report.title, 'view')"
+              >
                 Visualizar
               </button>
-              <button class="text-xs text-blue-600 hover:text-blue-700 font-medium">
+              <button
+                type="button"
+                class="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                @click="reportActionSoon(report.title, 'pdf')"
+              >
                 Gerar PDF
               </button>
             </div>

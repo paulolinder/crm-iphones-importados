@@ -1,6 +1,12 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin' })
 useHead({ title: 'Importar produtos' })
+
+const { info: toastInfo } = useToast()
+
+function onChooseFileClick() {
+  toastInfo('Upload em desenvolvimento', 'Seleção de arquivo e validação em massa serão habilitadas em breve.')
+}
 </script>
 
 <template>
@@ -26,6 +32,7 @@ useHead({ title: 'Importar produtos' })
       <button
         type="button"
         class="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-600"
+        @click="onChooseFileClick"
       >
         Escolher arquivo
       </button>

@@ -56,6 +56,12 @@ const statusConfig: Record<string, { label: string; bg: string; text: string }> 
 }
 
 const getStockUi = (status: string) => statusConfig[status] ?? statusConfig.in_stock
+
+const { info: toastInfo } = useToast()
+
+function onRegisterImeiClick() {
+  toastInfo('Em breve', 'O cadastro em lote de IMEI/serial será integrado ao estoque rastreável.')
+}
 </script>
 
 <template>
@@ -243,7 +249,7 @@ const getStockUi = (status: string) => statusConfig[status] ?? statusConfig.in_s
         <p class="text-sm text-slate-500 mb-6 max-w-sm mx-auto">
           Rastreie produtos individualmente por número IMEI ou serial.
         </p>
-        <button class="btn-primary">
+        <button type="button" class="btn-primary" @click="onRegisterImeiClick">
           <Icon name="lucide:plus" class="w-4 h-4" />
           Registrar IMEI
         </button>

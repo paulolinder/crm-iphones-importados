@@ -1,6 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin' })
 useHead({ title: 'Nova marca' })
+
+const notifyFormPlaceholder = usePlaceholderSubmit()
 </script>
 
 <template>
@@ -24,6 +26,13 @@ useHead({ title: 'Nova marca' })
         <AdminFieldStub label="URL do logo" hint="https://..." />
         <AdminFieldStub label="Descrição" />
       </AdminFormGrid>
+      <button
+        type="button"
+        class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/25"
+        @click="notifyFormPlaceholder"
+      >
+        Salvar (placeholder)
+      </button>
     </div>
   </div>
 </template>
