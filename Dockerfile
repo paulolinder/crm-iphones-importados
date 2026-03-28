@@ -1,14 +1,10 @@
 # ===============================
 # Eleve Imports CRM - Production Dockerfile
 # ===============================
-# Multi-stage build for optimal image size
-# Compatible with Easypanel and similar platforms
+# Optimized for Easypanel deployment
 # ===============================
 
-# ------------------------------
-# Stage 1: Dependencies
-# ------------------------------
-FROM node:20-alpine AS deps
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -18,40 +14,18 @@ RUN apk add --no-cache libc6-compat
 # Copy package files
 COPY package.json package-lock.json* ./
 
-# Install dependencies
-RUN npm ci --only=production=false
-
-# ------------------------------
-# Stage 2: Builder
-# ------------------------------
-FROM node:20-alpine AS builder
-
-WORKDIR /app
-
-# Copy dependencies from deps stage
-COPY --from=deps /app/node_modules ./node_modules
+# Install all dependencies
+RUN npm ci
 
 # Copy source code
 COPY . .
 
-# Build arguments for environment
-ARG NUXT_PUBLIC_SUPABASE_URL
-ARG NUXT_PUBLIC_SUPABASE_KEY
-ARG NUXT_PUBLIC_APP_NAME="Eleve Imports CRM"
-ARG NUXT_PUBLIC_APP_VERSION="0.1.0"
-
-# Set environment variables for build
-ENV NUXT_PUBLIC_SUPABASE_URL=$NUXT_PUBLIC_SUPABASE_URL
-ENV NUXT_PUBLIC_SUPABASE_KEY=$NUXT_PUBLIC_SUPABASE_KEY
-ENV NUXT_PUBLIC_APP_NAME=$NUXT_PUBLIC_APP_NAME
-ENV NUXT_PUBLIC_APP_VERSION=$NUXT_PUBLIC_APP_VERSION
-ENV NODE_ENV=production
-
 # Build the application
+ENV NODE_ENV=production
 RUN npm run build
 
 # ------------------------------
-# Stage 3: Production Runner
+# Production Runner
 # ------------------------------
 FROM node:20-alpine AS runner
 
@@ -76,10 +50,6 @@ USER nuxtjs
 
 # Expose port
 EXPOSE 3000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
 
 # Start the application
 CMD ["node", ".output/server/index.mjs"]
