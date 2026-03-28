@@ -250,11 +250,13 @@ export function useProductsService() {
 
     assertSupabaseResult(error, 'Não foi possível criar o produto')
 
+    const initialQty = payload.stock_quantity ?? 0
+
     const { error: inventoryError } = await client
       .from('inventory_items')
       .insert({
         product_id: product.id,
-        quantity: 0,
+        quantity: initialQty,
         reserved_quantity: 0,
         min_stock: payload.min_stock ?? 0,
         max_stock: payload.max_stock ?? null,
@@ -312,14 +314,29 @@ export function useProductsService() {
 
     assertSupabaseResult(error, 'Não foi possível atualizar o produto')
 
-    if (typeof payload.min_stock === 'number' || typeof payload.max_stock === 'number' || typeof payload.cost === 'number') {
+    if (
+      typeof payload.min_stock === 'number'
+      || typeof payload.max_stock === 'number'
+      || typeof payload.cost === 'number'
+      || typeof payload.stock_quantity === 'number'
+    ) {
+      const inventoryPatch: Record<string, unknown> = {}
+      if (typeof payload.min_stock === 'number') {
+        inventoryPatch.min_stock = payload.min_stock
+      }
+      if (typeof payload.max_stock === 'number') {
+        inventoryPatch.max_stock = payload.max_stock
+      }
+      if (typeof payload.cost === 'number') {
+        inventoryPatch.average_cost = payload.cost
+      }
+      if (typeof payload.stock_quantity === 'number') {
+        inventoryPatch.quantity = payload.stock_quantity
+      }
+
       const { error: inventoryError } = await client
         .from('inventory_items')
-        .update({
-          min_stock: payload.min_stock,
-          max_stock: payload.max_stock,
-          average_cost: payload.cost,
-        })
+        .update(inventoryPatch)
         .eq('product_id', id)
 
       assertSupabaseResult(inventoryError, 'Produto atualizado, mas o estoque não foi sincronizado')
@@ -401,6 +418,51 @@ export function useProductsService() {
     return (data ?? []).map(brand => mapBrand(brand)!).filter(Boolean)
   }
 
+  const createBrand = async (input: { name: string; description?: string | null }) => {
+    const name = input.name.trim()
+    if (!name) {
+      throw new Error('Informe o nome da marca.')
+    }
+
+    const { data: duplicate } = await client
+      .from('brands')
+      .select('id')
+      .eq('name', name)
+      .maybeSingle()
+
+    if (duplicate) {
+      throw new Error('Já existe uma marca com este nome.')
+    }
+
+    const baseSlug = slugify(name) || `marca-${Date.now().toString(36)}`
+
+    for (let i = 0; i < 24; i++) {
+      const slug = i === 0 ? baseSlug : `${baseSlug}-${i}`
+      const { data, error } = await client
+        .from('brands')
+        .insert({
+          name,
+          slug,
+          description: input.description?.trim() || null,
+          active: true,
+        })
+        .select('*')
+        .single()
+
+      if (!error && data) {
+        return mapBrand(data)!
+      }
+
+      if (error?.code === '23505') {
+        continue
+      }
+
+      assertSupabaseResult(error, 'Não foi possível criar a marca')
+    }
+
+    throw new Error('Não foi possível gerar um identificador único (slug) para a marca.')
+  }
+
   const listCategories = async () => {
     const { data, error } = await client
       .from('categories')
@@ -420,6 +482,7 @@ export function useProductsService() {
     changeStatus,
     getStats,
     listBrands,
+    createBrand,
     listCategories,
   }
 }

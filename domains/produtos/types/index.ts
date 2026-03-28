@@ -71,6 +71,8 @@ export interface ProductFormData {
   promotional_price?: number
   min_stock?: number
   max_stock?: number
+  /** Quantidade em estoque (criação: inicial; edição: sincroniza inventory_items) */
+  stock_quantity?: number
   weight?: number
   dimensions?: ProductDimensions
   images?: string[]

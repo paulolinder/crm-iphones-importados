@@ -21,6 +21,7 @@ const form = reactive({
   brand_id: '',
   price: 0,
   cost: 0,
+  stock_quantity: 0,
   min_stock: 0,
   max_stock: 0,
   status: 'active' as 'draft' | 'active' | 'inactive' | 'archived',
@@ -31,6 +32,12 @@ const form = reactive({
 const loading = ref(true)
 const saving = ref(false)
 const submitError = ref('')
+
+function onBrandCreated(brand: { id: string; name: string }) {
+  brands.value = [...brands.value, brand].sort((a, b) =>
+    a.name.localeCompare(b.name, 'pt-BR'),
+  )
+}
 
 onMounted(async () => {
   try {
@@ -49,6 +56,7 @@ onMounted(async () => {
     form.brand_id = product.brand_id ?? ''
     form.price = product.price
     form.cost = product.cost ?? 0
+    form.stock_quantity = product.stock_quantity
     form.min_stock = product.min_stock
     form.max_stock = product.max_stock ?? 0
     form.status = product.status
@@ -75,6 +83,7 @@ const handleSubmit = async () => {
       brand_id: form.brand_id || undefined,
       price: form.price,
       cost: form.cost || undefined,
+      stock_quantity: form.stock_quantity,
       min_stock: form.min_stock,
       max_stock: form.max_stock || undefined,
       status: form.status,
@@ -140,13 +149,11 @@ const handleSubmit = async () => {
             </select>
           </div>
 
-          <div>
-            <label class="form-label">Marca</label>
-            <select v-model="form.brand_id" class="form-input">
-              <option value="">Selecione</option>
-              <option v-for="brand in brands" :key="brand.id" :value="brand.id">{{ brand.name }}</option>
-            </select>
-          </div>
+          <AdminBrandField
+            v-model="form.brand_id"
+            :brands="brands"
+            @brand-created="onBrandCreated"
+          />
 
           <div>
             <label class="form-label">Preço de venda</label>
@@ -156,6 +163,20 @@ const handleSubmit = async () => {
           <div>
             <label class="form-label">Custo</label>
             <input v-model.number="form.cost" type="number" min="0" step="0.01" class="form-input" />
+          </div>
+
+          <div>
+            <label class="form-label">Quantidade em estoque</label>
+            <input
+              v-model.number="form.stock_quantity"
+              type="number"
+              min="0"
+              step="1"
+              class="form-input"
+            >
+            <p class="text-xs text-slate-500 mt-1">
+              Ajuste direto do saldo. Para histórico formal, use movimentações de estoque.
+            </p>
           </div>
 
           <div>

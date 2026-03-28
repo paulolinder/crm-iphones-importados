@@ -12,6 +12,7 @@ export const productFormSchema = z.object({
   promotional_price: z.number().nonnegative().optional(),
   min_stock: z.number().int().nonnegative().optional(),
   max_stock: z.number().int().nonnegative().optional(),
+  stock_quantity: z.number().int().nonnegative().optional(),
   weight: z.number().nonnegative().optional(),
   dimensions: z.object({
     width: z.number().nonnegative(),
