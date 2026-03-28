@@ -314,9 +314,10 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
         </div>
 
         <div class="divide-y divide-slate-50">
-          <div
+          <NuxtLink
             v-for="order in recentOrders"
             :key="order.id"
+            :to="`/admin/vendas/${order.id}`"
             class="flex items-center gap-4 px-5 lg:px-6 py-4 hover:bg-slate-50/50 transition-colors cursor-pointer"
           >
             <!-- Order Number -->
@@ -346,7 +347,7 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
               <p class="font-semibold text-slate-900">{{ format(order.total) }}</p>
               <p class="text-xs text-slate-400">{{ formatRelative(order.date) }}</p>
             </div>
-          </div>
+          </NuxtLink>
         </div>
       </div>
 

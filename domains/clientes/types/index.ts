@@ -13,7 +13,7 @@ export interface Customer extends BaseEntity {
   mobile: string | null
   whatsapp: string | null
   document: string | null
-  document_type: 'cpf' | 'cnpj' | null
+  document_type: 'cpf' | 'cnpj' | 'rg' | 'passport' | 'other' | null
   birth_date: string | null
   gender: 'M' | 'F' | null
   address: Address | null
@@ -22,6 +22,7 @@ export interface Customer extends BaseEntity {
   total_orders: number
   total_spent: number
   last_purchase_at: string | null
+  status: 'lead' | 'active' | 'inactive' | 'vip' | 'blocked'
   active: boolean
 }
 
@@ -32,17 +33,18 @@ export interface CustomerFormData {
   mobile?: string
   whatsapp?: string
   document?: string
-  document_type?: 'cpf' | 'cnpj'
+  document_type?: 'cpf' | 'cnpj' | 'rg' | 'passport' | 'other'
   birth_date?: string
   gender?: 'M' | 'F'
   address?: Partial<Address>
   notes?: string
   tags?: string[]
+  status?: 'lead' | 'active' | 'inactive' | 'vip' | 'blocked'
 }
 
 export interface CustomerFilters {
   search?: string
-  status?: 'active' | 'inactive'
+  status?: 'lead' | 'active' | 'inactive' | 'vip' | 'blocked'
   has_orders?: boolean
   tags?: string[]
   created_from?: string

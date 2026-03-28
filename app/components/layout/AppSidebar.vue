@@ -50,10 +50,28 @@ const menuGroups = [
         badgeColor: 'success',
       },
       {
+        key: 'pedidos',
+        label: 'Pedidos',
+        icon: 'lucide:clipboard-list',
+        to: '/admin/pedidos',
+      },
+      {
         key: 'produtos',
         label: 'Produtos',
         icon: 'lucide:package',
         to: '/admin/produtos',
+      },
+      {
+        key: 'categorias',
+        label: 'Categorias',
+        icon: 'lucide:folder',
+        to: '/admin/produtos/categorias',
+      },
+      {
+        key: 'marcas',
+        label: 'Marcas',
+        icon: 'lucide:award',
+        to: '/admin/produtos/marcas',
       },
       {
         key: 'estoque',
@@ -108,6 +126,12 @@ const menuGroups = [
         label: 'Usuários',
         icon: 'lucide:user-cog',
         to: '/admin/usuarios',
+      },
+      {
+        key: 'permissoes',
+        label: 'Permissões',
+        icon: 'lucide:shield',
+        to: '/admin/permissoes',
       },
       {
         key: 'configuracoes',

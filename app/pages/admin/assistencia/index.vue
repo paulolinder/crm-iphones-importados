@@ -11,8 +11,7 @@ useHead({
   title: 'Assistência Técnica',
 })
 
-const { format } = useCurrency()
-const { formatDate, formatRelative } = useDateFormat()
+const { formatRelative } = useDateFormat()
 
 const orders = ref([
   { id: '1', number: 'OS-2024-001', customer: 'João Silva', device: 'iPhone 14 Pro', issue: 'Tela quebrada', status: 'pending', createdAt: new Date(Date.now() - 1000 * 60 * 60) },
@@ -103,7 +102,7 @@ const statusConfig: Record<string, { label: string; bg: string; text: string; ic
         <div
           v-for="order in orders"
           :key="order.id"
-          class="flex flex-col lg:flex-row lg:items-center gap-4 px-5 lg:px-6 py-5 hover:bg-slate-50/50 transition-colors cursor-pointer"
+          class="flex flex-col lg:flex-row lg:items-center gap-4 px-5 lg:px-6 py-5 hover:bg-slate-50/50 transition-colors"
         >
           <div class="flex items-center gap-4 flex-1 min-w-0">
             <div class="hidden sm:flex items-center justify-center w-14 h-14 rounded-xl bg-slate-100">
@@ -129,12 +128,20 @@ const statusConfig: Record<string, { label: string; bg: string; text: string; ic
               {{ formatRelative(order.createdAt) }}
             </div>
             <div class="flex items-center gap-1">
-              <button class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+              <NuxtLink
+                :to="`/admin/assistencia/${order.id}`"
+                class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                title="Ver OS"
+              >
                 <Icon name="lucide:eye" class="w-4 h-4" />
-              </button>
-              <button class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+              </NuxtLink>
+              <NuxtLink
+                :to="`/admin/assistencia/${order.id}/editar`"
+                class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                title="Editar OS"
+              >
                 <Icon name="lucide:edit" class="w-4 h-4" />
-              </button>
+              </NuxtLink>
             </div>
           </div>
         </div>

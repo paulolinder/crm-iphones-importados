@@ -12,75 +12,28 @@ useHead({
 })
 
 const { format } = useCurrency()
-const { formatDate, formatRelative } = useDateFormat()
+const { formatRelative } = useDateFormat()
 
 const searchQuery = ref('')
 const selectedStatus = ref('')
+const { orders, loading, error, pagination, updateFilters, loadOrders } = useOrders()
+const ordersService = useOrdersService()
+const stats = ref({
+  today: format(0),
+  pending: 0,
+  confirmed: 0,
+  total: 0,
+})
 
-const orders = ref([
-  {
-    id: '1',
-    number: '#2847',
-    customer: { name: 'João Silva', email: 'joao@email.com' },
-    items: [{ name: 'iPhone 15 Pro Max 256GB', qty: 1 }],
-    total: 9499,
-    status: 'pending',
-    paymentStatus: 'pending',
-    paymentMethod: 'pix',
-    date: new Date(Date.now() - 1000 * 60 * 15),
-  },
-  {
-    id: '2',
-    number: '#2846',
-    customer: { name: 'Maria Santos', email: 'maria@email.com' },
-    items: [{ name: 'iPhone 15 128GB', qty: 1 }, { name: 'AirPods Pro 2', qty: 1 }],
-    total: 8298,
-    status: 'confirmed',
-    paymentStatus: 'paid',
-    paymentMethod: 'credit_card',
-    date: new Date(Date.now() - 1000 * 60 * 45),
-  },
-  {
-    id: '3',
-    number: '#2845',
-    customer: { name: 'Pedro Costa', email: 'pedro@email.com' },
-    items: [{ name: 'Apple Watch Ultra 2', qty: 1 }],
-    total: 5999,
-    status: 'shipped',
-    paymentStatus: 'paid',
-    paymentMethod: 'pix',
-    date: new Date(Date.now() - 1000 * 60 * 120),
-  },
-  {
-    id: '4',
-    number: '#2844',
-    customer: { name: 'Ana Oliveira', email: 'ana@email.com' },
-    items: [{ name: 'MacBook Air M3', qty: 1 }],
-    total: 11999,
-    status: 'delivered',
-    paymentStatus: 'paid',
-    paymentMethod: 'credit_card',
-    date: new Date(Date.now() - 1000 * 60 * 180),
-  },
-  {
-    id: '5',
-    number: '#2843',
-    customer: { name: 'Carlos Mendes', email: 'carlos@email.com' },
-    items: [{ name: 'iPad Pro 12.9"', qty: 1 }],
-    total: 8999,
-    status: 'cancelled',
-    paymentStatus: 'refunded',
-    paymentMethod: 'pix',
-    date: new Date(Date.now() - 1000 * 60 * 60 * 24),
-  },
-])
-
-const stats = computed(() => ({
-  today: format(orders.value.filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + o.total, 0)),
-  pending: orders.value.filter(o => o.status === 'pending').length,
-  confirmed: orders.value.filter(o => o.status === 'confirmed').length,
-  total: orders.value.length,
-}))
+const refreshStats = async () => {
+  const response = await ordersService.getStats()
+  stats.value = {
+    today: format(response.total_revenue),
+    pending: response.pending_orders,
+    confirmed: orders.value.filter(order => order.status === 'confirmed').length,
+    total: response.total_orders,
+  }
+}
 
 const statusConfig: Record<string, { label: string; bg: string; text: string; icon: string }> = {
   pending: { label: 'Pendente', bg: 'bg-amber-50', text: 'text-amber-700', icon: 'lucide:clock' },
@@ -96,16 +49,31 @@ const paymentStatusConfig: Record<string, { label: string; color: string }> = {
   refunded: { label: 'Reembolsado', color: 'text-slate-500' },
 }
 
-const filteredOrders = computed(() => {
-  return orders.value.filter(order => {
-    const matchesSearch = !searchQuery.value ||
-      order.number.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      order.customer.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+const getOrderStatusUi = (status: string) => statusConfig[status] ?? statusConfig.pending
+const getPaymentStatusUi = (status: string) => paymentStatusConfig[status] ?? paymentStatusConfig.pending
 
-    const matchesStatus = !selectedStatus.value || order.status === selectedStatus.value
-
-    return matchesSearch && matchesStatus
+const syncFilters = useDebounceFn(async () => {
+  updateFilters({
+    search: searchQuery.value || undefined,
+    status: (selectedStatus.value || undefined) as 'draft' | 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'returned' | undefined,
   })
+
+  pagination.currentPage.value = 1
+  await loadOrders()
+  await refreshStats()
+}, 250)
+
+watch([searchQuery, selectedStatus], () => {
+  void syncFilters()
+})
+
+watch(() => pagination.currentPage.value, () => {
+  void loadOrders()
+})
+
+onMounted(async () => {
+  await loadOrders()
+  await refreshStats()
 })
 </script>
 
@@ -117,7 +85,7 @@ const filteredOrders = computed(() => {
       description="Gerencie os pedidos da loja"
       :breadcrumbs="[{ label: 'Vendas' }]"
       :actions="[
-        { key: 'export', label: 'Exportar', icon: 'lucide:download', variant: 'outline' },
+        { key: 'export', label: 'Exportar', icon: 'lucide:download', variant: 'outline', to: '/admin/vendas/exportar' },
         { key: 'new', label: 'Nova Venda', icon: 'lucide:plus', variant: 'primary', to: '/admin/vendas/nova' },
       ]"
     />
@@ -199,7 +167,7 @@ const filteredOrders = computed(() => {
       <!-- Orders List -->
       <div class="divide-y divide-slate-50">
         <div
-          v-for="order in filteredOrders"
+          v-for="order in orders"
           :key="order.id"
           class="flex flex-col lg:flex-row lg:items-center gap-4 px-5 lg:px-6 py-5 hover:bg-slate-50/50 transition-colors cursor-pointer"
         >
@@ -211,19 +179,19 @@ const filteredOrders = computed(() => {
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-1">
                 <span class="sm:hidden text-sm font-bold text-slate-600">{{ order.number }}</span>
-                <span class="font-semibold text-slate-900">{{ order.customer.name }}</span>
+                <span class="font-semibold text-slate-900">{{ order.customer?.name || 'Cliente sem cadastro' }}</span>
                 <span
                   class="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                  :class="[statusConfig[order.status].bg, statusConfig[order.status].text]"
+                  :class="[getOrderStatusUi(order.status).bg, getOrderStatusUi(order.status).text]"
                 >
-                  <Icon :name="statusConfig[order.status].icon" class="w-3 h-3" />
-                  {{ statusConfig[order.status].label }}
+                  <Icon :name="getOrderStatusUi(order.status).icon" class="w-3 h-3" />
+                  {{ getOrderStatusUi(order.status).label }}
                 </span>
               </div>
               <p class="text-sm text-slate-500 truncate">
-                {{ order.items.map(i => `${i.qty}x ${i.name}`).join(', ') }}
+                {{ order.items.map(item => `${item.quantity}x ${item.product_name}`).join(', ') }}
               </p>
-              <p class="text-xs text-slate-400 mt-1">{{ formatRelative(order.date) }}</p>
+              <p class="text-xs text-slate-400 mt-1">{{ formatRelative(new Date(order.created_at)) }}</p>
             </div>
           </div>
 
@@ -231,20 +199,20 @@ const filteredOrders = computed(() => {
           <div class="flex lg:hidden items-center gap-2">
             <span
               class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-              :class="[statusConfig[order.status].bg, statusConfig[order.status].text]"
+              :class="[getOrderStatusUi(order.status).bg, getOrderStatusUi(order.status).text]"
             >
-              <Icon :name="statusConfig[order.status].icon" class="w-3 h-3" />
-              {{ statusConfig[order.status].label }}
+              <Icon :name="getOrderStatusUi(order.status).icon" class="w-3 h-3" />
+              {{ getOrderStatusUi(order.status).label }}
             </span>
           </div>
 
           <!-- Payment & Total -->
           <div class="flex items-center justify-between lg:gap-8">
             <div class="hidden lg:block text-right">
-              <p :class="paymentStatusConfig[order.paymentStatus].color" class="text-sm font-medium">
-                {{ paymentStatusConfig[order.paymentStatus].label }}
+              <p :class="getPaymentStatusUi(order.payment_status).color" class="text-sm font-medium">
+                {{ getPaymentStatusUi(order.payment_status).label }}
               </p>
-              <p class="text-xs text-slate-400 capitalize">{{ order.paymentMethod.replace('_', ' ') }}</p>
+              <p class="text-xs text-slate-400 capitalize">{{ order.payment_method?.replace('_', ' ') || 'sem método' }}</p>
             </div>
             <div class="text-right">
               <p class="text-lg font-bold text-slate-900">{{ format(order.total) }}</p>
@@ -253,6 +221,7 @@ const filteredOrders = computed(() => {
               <NuxtLink
                 :to="`/admin/vendas/${order.id}`"
                 class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                title="Ver detalhes do pedido"
               >
                 <Icon name="lucide:eye" class="w-4 h-4" />
               </NuxtLink>
@@ -265,10 +234,14 @@ const filteredOrders = computed(() => {
       </div>
 
       <!-- Empty State -->
-      <div v-if="filteredOrders.length === 0" class="py-12 text-center">
+      <div v-if="loading" class="py-12 text-center text-sm text-slate-500">
+        Carregando pedidos...
+      </div>
+
+      <div v-else-if="orders.length === 0" class="py-12 text-center">
         <Icon name="lucide:shopping-cart" class="w-12 h-12 text-slate-300 mx-auto mb-4" />
         <h3 class="text-lg font-medium text-slate-900 mb-1">Nenhum pedido encontrado</h3>
-        <p class="text-sm text-slate-500">Tente ajustar os filtros de busca</p>
+        <p class="text-sm text-slate-500">{{ error?.message || 'Tente ajustar os filtros de busca' }}</p>
       </div>
     </div>
   </div>

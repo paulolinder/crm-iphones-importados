@@ -14,21 +14,13 @@ useHead({
 const { format } = useCurrency()
 const { formatDate } = useDateFormat()
 
-const activeTab = ref<'overview' | 'receivables' | 'payables'>('overview')
-
+const { transactions, loading, error, loadTransactions, getSummary } = useFinance()
 const stats = ref({
   balance: 185000,
   receivables: 45000,
   payables: 18000,
   monthlyProfit: 32000,
 })
-
-const recentTransactions = ref([
-  { id: '1', type: 'income', description: 'Venda #2847 - João Silva', value: 9499, date: new Date(Date.now() - 1000 * 60 * 30), status: 'completed' },
-  { id: '2', type: 'income', description: 'Venda #2846 - Maria Santos', value: 8298, date: new Date(Date.now() - 1000 * 60 * 60), status: 'completed' },
-  { id: '3', type: 'expense', description: 'Fornecedor - Tech Import', value: 25000, date: new Date(Date.now() - 1000 * 60 * 120), status: 'completed' },
-  { id: '4', type: 'income', description: 'Venda #2845 - Pedro Costa', value: 5999, date: new Date(Date.now() - 1000 * 60 * 180), status: 'pending' },
-])
 
 const weeklyData = [
   { day: 'Seg', income: 18500, expense: 5200 },
@@ -41,6 +33,15 @@ const weeklyData = [
 ]
 
 const maxValue = Math.max(...weeklyData.map(d => Math.max(d.income, d.expense)))
+
+onMounted(async () => {
+  const [summary] = await Promise.all([
+    getSummary(),
+    loadTransactions(),
+  ])
+
+  stats.value = summary
+})
 </script>
 
 <template>
@@ -51,10 +52,29 @@ const maxValue = Math.max(...weeklyData.map(d => Math.max(d.income, d.expense)))
       description="Controle financeiro e fluxo de caixa"
       :breadcrumbs="[{ label: 'Financeiro' }]"
       :actions="[
-        { key: 'export', label: 'Exportar', icon: 'lucide:download', variant: 'outline' },
-        { key: 'new', label: 'Nova Transação', icon: 'lucide:plus', variant: 'primary' },
+        { key: 'export', label: 'Exportar', icon: 'lucide:download', variant: 'outline', to: '/admin/financeiro/exportar' },
+        { key: 'new', label: 'Nova Transação', icon: 'lucide:plus', variant: 'primary', to: '/admin/financeiro/lancamentos/novo' },
       ]"
     />
+
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+      <NuxtLink
+        v-for="item in [
+          { label: 'Caixa', to: '/admin/financeiro/caixa', icon: 'lucide:banknote' },
+          { label: 'A pagar', to: '/admin/financeiro/contas-pagar', icon: 'lucide:arrow-up-circle' },
+          { label: 'A receber', to: '/admin/financeiro/contas-receber', icon: 'lucide:arrow-down-circle' },
+          { label: 'Lançamentos', to: '/admin/financeiro/lancamentos', icon: 'lucide:list' },
+          { label: 'Exportar', to: '/admin/financeiro/exportar', icon: 'lucide:download' },
+          { label: 'Vendas', to: '/admin/vendas', icon: 'lucide:shopping-cart' },
+        ]"
+        :key="item.to"
+        :to="item.to"
+        class="flex items-center gap-2 px-4 py-3 rounded-xl bg-white border border-slate-100 shadow-sm text-sm font-medium text-slate-700 hover:border-blue-200 hover:text-blue-700 transition-colors"
+      >
+        <Icon :name="item.icon" class="w-4 h-4 text-slate-400" />
+        {{ item.label }}
+      </NuxtLink>
+    </div>
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -153,39 +173,50 @@ const maxValue = Math.max(...weeklyData.map(d => Math.max(d.income, d.expense)))
 
         <div class="divide-y divide-slate-50">
           <div
-            v-for="transaction in recentTransactions"
+            v-for="transaction in transactions.slice(0, 6)"
             :key="transaction.id"
             class="flex items-center gap-3 px-5 lg:px-6 py-4 hover:bg-slate-50/50 transition-colors"
           >
             <div
               class="w-10 h-10 rounded-xl flex items-center justify-center"
-              :class="transaction.type === 'income' ? 'bg-emerald-100' : 'bg-red-100'"
+              :class="transaction.transaction_type === 'income' ? 'bg-emerald-100' : 'bg-red-100'"
             >
               <Icon
-                :name="transaction.type === 'income' ? 'lucide:arrow-down' : 'lucide:arrow-up'"
+                :name="transaction.transaction_type === 'income' ? 'lucide:arrow-down' : 'lucide:arrow-up'"
                 class="w-5 h-5"
-                :class="transaction.type === 'income' ? 'text-emerald-600' : 'text-red-600'"
+                :class="transaction.transaction_type === 'income' ? 'text-emerald-600' : 'text-red-600'"
               />
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium text-slate-900 truncate">{{ transaction.description }}</p>
-              <p class="text-xs text-slate-500">{{ formatDate(transaction.date, 'dd/MM HH:mm') }}</p>
+              <p class="text-xs text-slate-500">{{ formatDate(new Date(transaction.occurred_at), 'dd/MM HH:mm') }}</p>
             </div>
             <div class="text-right">
               <p
                 class="font-semibold"
-                :class="transaction.type === 'income' ? 'text-emerald-600' : 'text-red-600'"
+                :class="transaction.transaction_type === 'income' ? 'text-emerald-600' : 'text-red-600'"
               >
-                {{ transaction.type === 'income' ? '+' : '-' }}{{ format(transaction.value) }}
+                {{ transaction.transaction_type === 'income' ? '+' : '-' }}{{ format(transaction.amount) }}
               </p>
             </div>
           </div>
         </div>
 
+        <div v-if="loading" class="px-6 py-8 text-center text-sm text-slate-500">
+          Carregando transações...
+        </div>
+
+        <div v-else-if="!transactions.length" class="px-6 py-8 text-center text-sm text-slate-500">
+          {{ error?.message || 'Nenhuma transação encontrada.' }}
+        </div>
+
         <div class="px-5 lg:px-6 py-3 border-t border-slate-100">
-          <button class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+          <NuxtLink
+            to="/admin/financeiro/lancamentos"
+            class="text-sm text-blue-600 hover:text-blue-700 font-medium"
+          >
             Ver todas as transações
-          </button>
+          </NuxtLink>
         </div>
       </div>
     </div>

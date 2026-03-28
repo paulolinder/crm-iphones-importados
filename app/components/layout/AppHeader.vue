@@ -221,9 +221,13 @@ const quickActions = [
 
             <!-- Footer -->
             <div class="px-5 py-3 border-t border-slate-100 bg-slate-50/50">
-              <button class="w-full text-sm text-blue-600 hover:text-blue-700 font-medium text-center">
+              <NuxtLink
+                to="/admin/notificacoes"
+                class="block w-full text-sm text-blue-600 hover:text-blue-700 font-medium text-center"
+                @click="showNotifications = false"
+              >
                 Ver todas as notificações
-              </button>
+              </NuxtLink>
             </div>
           </div>
         </Transition>

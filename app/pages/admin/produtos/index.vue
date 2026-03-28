@@ -16,90 +16,26 @@ const { format } = useCurrency()
 const searchQuery = ref('')
 const selectedCategory = ref('')
 const viewMode = ref<'grid' | 'list'>('grid')
+const { products, loading, error, pagination, updateFilters, loadProducts } = useProducts()
+const productsService = useProductsService()
+const categories = ref<{ id: string, name: string }[]>([])
+const stats = ref({
+  total: 0,
+  active: 0,
+  lowStock: 0,
+  outOfStock: 0,
+})
 
-const products = ref([
-  {
-    id: '1',
-    name: 'iPhone 15 Pro Max',
-    sku: 'IPH15PM256',
-    category: 'iPhones',
-    price: 9499,
-    stock: 12,
-    minStock: 5,
-    status: 'active',
-    image: '',
-    sold: 45,
-  },
-  {
-    id: '2',
-    name: 'iPhone 15',
-    sku: 'IPH15128',
-    category: 'iPhones',
-    price: 6499,
-    stock: 25,
-    minStock: 10,
-    status: 'active',
-    image: '',
-    sold: 38,
-  },
-  {
-    id: '3',
-    name: 'AirPods Pro 2',
-    sku: 'APP2',
-    category: 'Acessórios',
-    price: 1899,
-    stock: 3,
-    minStock: 10,
-    status: 'low_stock',
-    image: '',
-    sold: 62,
-  },
-  {
-    id: '4',
-    name: 'Apple Watch Ultra 2',
-    sku: 'AWU2',
-    category: 'Wearables',
-    price: 5999,
-    stock: 8,
-    minStock: 5,
-    status: 'active',
-    image: '',
-    sold: 28,
-  },
-  {
-    id: '5',
-    name: 'MacBook Air M3',
-    sku: 'MBA-M3',
-    category: 'Notebooks',
-    price: 11999,
-    stock: 0,
-    minStock: 3,
-    status: 'out_of_stock',
-    image: '',
-    sold: 15,
-  },
-  {
-    id: '6',
-    name: 'iPad Pro 12.9"',
-    sku: 'IPADPRO12',
-    category: 'Tablets',
-    price: 8999,
-    stock: 6,
-    minStock: 5,
-    status: 'active',
-    image: '',
-    sold: 22,
-  },
-])
+const refreshStats = async () => {
+  const response = await productsService.getStats()
 
-const stats = computed(() => ({
-  total: products.value.length,
-  active: products.value.filter(p => p.status === 'active').length,
-  lowStock: products.value.filter(p => p.status === 'low_stock').length,
-  outOfStock: products.value.filter(p => p.status === 'out_of_stock').length,
-}))
-
-const categories = ['iPhones', 'Acessórios', 'Wearables', 'Notebooks', 'Tablets']
+  stats.value = {
+    total: response.total,
+    active: response.active,
+    lowStock: response.low_stock,
+    outOfStock: response.out_of_stock,
+  }
+}
 
 const statusConfig: Record<string, { label: string; bg: string; text: string }> = {
   active: { label: 'Em estoque', bg: 'bg-emerald-50', text: 'text-emerald-700' },
@@ -107,16 +43,45 @@ const statusConfig: Record<string, { label: string; bg: string; text: string }> 
   out_of_stock: { label: 'Sem estoque', bg: 'bg-red-50', text: 'text-red-700' },
 }
 
-const filteredProducts = computed(() => {
-  return products.value.filter(product => {
-    const matchesSearch = !searchQuery.value ||
-      product.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchQuery.value.toLowerCase())
+const getStockStatus = (product: { stock_quantity: number, min_stock: number }) => {
+  if (product.stock_quantity === 0) {
+    return statusConfig.out_of_stock
+  }
 
-    const matchesCategory = !selectedCategory.value || product.category === selectedCategory.value
+  if (product.stock_quantity <= product.min_stock) {
+    return statusConfig.low_stock
+  }
 
-    return matchesSearch && matchesCategory
+  return statusConfig.active
+}
+
+const syncFilters = useDebounceFn(async () => {
+  updateFilters({
+    search: searchQuery.value || undefined,
+    category_id: selectedCategory.value || undefined,
   })
+
+  pagination.currentPage.value = 1
+  await loadProducts()
+  await refreshStats()
+}, 250)
+
+watch([searchQuery, selectedCategory], () => {
+  void syncFilters()
+})
+
+watch(() => pagination.currentPage.value, () => {
+  void loadProducts()
+})
+
+onMounted(async () => {
+  const [categoryRows] = await Promise.all([
+    productsService.listCategories(),
+    loadProducts(),
+    refreshStats(),
+  ])
+
+  categories.value = categoryRows.map(category => ({ id: category.id, name: category.name }))
 })
 </script>
 
@@ -128,7 +93,9 @@ const filteredProducts = computed(() => {
       description="Catálogo de produtos da loja"
       :breadcrumbs="[{ label: 'Produtos' }]"
       :actions="[
-        { key: 'import', label: 'Importar', icon: 'lucide:upload', variant: 'outline' },
+        { key: 'cats', label: 'Categorias', icon: 'lucide:folder', variant: 'ghost', to: '/admin/produtos/categorias' },
+        { key: 'brands', label: 'Marcas', icon: 'lucide:award', variant: 'ghost', to: '/admin/produtos/marcas' },
+        { key: 'import', label: 'Importar', icon: 'lucide:upload', variant: 'outline', to: '/admin/produtos/importar' },
         { key: 'new', label: 'Novo Produto', icon: 'lucide:plus', variant: 'primary', to: '/admin/produtos/novo' },
       ]"
     />
@@ -199,7 +166,7 @@ const filteredProducts = computed(() => {
             class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
           >
             <option value="">Todas as categorias</option>
-            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+            <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
           </select>
           <div class="flex bg-slate-100 rounded-xl p-1">
             <button
@@ -227,7 +194,7 @@ const filteredProducts = computed(() => {
       class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6"
     >
       <div
-        v-for="product in filteredProducts"
+        v-for="product in products"
         :key="product.id"
         class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-lg transition-all duration-300 group"
       >
@@ -238,9 +205,9 @@ const filteredProducts = computed(() => {
           <div class="absolute top-3 left-3">
             <span
               class="px-2.5 py-1 rounded-full text-xs font-semibold"
-              :class="[statusConfig[product.status].bg, statusConfig[product.status].text]"
+              :class="[getStockStatus(product).bg, getStockStatus(product).text]"
             >
-              {{ statusConfig[product.status].label }}
+              {{ getStockStatus(product).label }}
             </span>
           </div>
           <!-- Quick Actions -->
@@ -248,6 +215,7 @@ const filteredProducts = computed(() => {
             <NuxtLink
               :to="`/admin/produtos/${product.id}`"
               class="p-2 bg-white rounded-lg shadow-md text-slate-600 hover:text-blue-600 transition-colors"
+              title="Ver detalhes"
             >
               <Icon name="lucide:eye" class="w-4 h-4" />
             </NuxtLink>
@@ -267,12 +235,12 @@ const filteredProducts = computed(() => {
 
           <div class="flex items-center justify-between">
             <span class="text-lg font-bold text-slate-900">{{ format(product.price) }}</span>
-            <span class="text-sm text-slate-500">{{ product.stock }} un.</span>
+            <span class="text-sm text-slate-500">{{ product.stock_quantity }} un.</span>
           </div>
 
           <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-sm">
-            <span class="text-slate-500">{{ product.category }}</span>
-            <span class="text-emerald-600 font-medium">{{ product.sold }} vendidos</span>
+            <span class="text-slate-500">{{ product.category?.name || 'Sem categoria' }}</span>
+            <span class="text-emerald-600 font-medium">Min. {{ product.min_stock }}</span>
           </div>
         </div>
       </div>
@@ -293,7 +261,7 @@ const filteredProducts = computed(() => {
         </thead>
         <tbody class="divide-y divide-slate-50">
           <tr
-            v-for="product in filteredProducts"
+            v-for="product in products"
             :key="product.id"
             class="hover:bg-slate-50/50 transition-colors"
           >
@@ -309,7 +277,7 @@ const filteredProducts = computed(() => {
               </div>
             </td>
             <td class="px-4 py-4 hidden md:table-cell">
-              <span class="text-slate-700">{{ product.category }}</span>
+              <span class="text-slate-700">{{ product.category?.name || 'Sem categoria' }}</span>
             </td>
             <td class="text-right px-4 py-4">
               <span class="font-semibold text-slate-900">{{ format(product.price) }}</span>
@@ -318,20 +286,20 @@ const filteredProducts = computed(() => {
               <span
                 class="font-semibold"
                 :class="[
-                  product.stock > product.minStock ? 'text-slate-700' : '',
-                  product.stock <= product.minStock && product.stock > 0 ? 'text-amber-600' : '',
-                  product.stock === 0 ? 'text-red-600' : '',
+                  product.stock_quantity > product.min_stock ? 'text-slate-700' : '',
+                  product.stock_quantity <= product.min_stock && product.stock_quantity > 0 ? 'text-amber-600' : '',
+                  product.stock_quantity === 0 ? 'text-red-600' : '',
                 ]"
               >
-                {{ product.stock }}
+                {{ product.stock_quantity }}
               </span>
             </td>
             <td class="text-center px-4 py-4 hidden lg:table-cell">
               <span
                 class="px-2.5 py-1 rounded-full text-xs font-medium"
-                :class="[statusConfig[product.status].bg, statusConfig[product.status].text]"
+                :class="[getStockStatus(product).bg, getStockStatus(product).text]"
               >
-                {{ statusConfig[product.status].label }}
+                {{ getStockStatus(product).label }}
               </span>
             </td>
             <td class="text-right px-5 lg:px-6 py-4">
@@ -339,6 +307,7 @@ const filteredProducts = computed(() => {
                 <NuxtLink
                   :to="`/admin/produtos/${product.id}`"
                   class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                  title="Ver detalhes"
                 >
                   <Icon name="lucide:eye" class="w-4 h-4" />
                 </NuxtLink>
@@ -353,6 +322,14 @@ const filteredProducts = computed(() => {
           </tr>
         </tbody>
       </table>
+
+      <div v-if="loading" class="px-6 py-10 text-center text-sm text-slate-500">
+        Carregando produtos...
+      </div>
+
+      <div v-else-if="!products.length" class="px-6 py-10 text-center text-sm text-slate-500">
+        {{ error?.message || 'Nenhum produto encontrado.' }}
+      </div>
     </div>
   </div>
 </template>

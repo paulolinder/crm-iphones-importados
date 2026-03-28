@@ -4,17 +4,16 @@
  * Composable para gerenciar filtros de listagem
  */
 
-import type { FilterParams } from '~/types'
+type FilterRecord = object
 
-interface UseFiltersOptions {
-  defaultFilters?: FilterParams
-  persistKey?: string
+interface UseFiltersOptions<T extends FilterRecord> {
+  defaultFilters?: T
 }
 
-export function useFilters<T extends FilterParams = FilterParams>(
-  options: UseFiltersOptions = {}
+export function useFilters<T extends FilterRecord = FilterRecord>(
+  options: UseFiltersOptions<T> = {}
 ) {
-  const { defaultFilters = {}, persistKey } = options
+  const { defaultFilters = {} as T } = options
   const route = useRoute()
   const router = useRouter()
 

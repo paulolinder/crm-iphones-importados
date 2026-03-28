@@ -15,8 +15,11 @@ export const CUSTOMER_GENDERS = [
 ] as const
 
 export const CUSTOMER_STATUS_OPTIONS = [
+  { label: 'Lead', value: 'lead' },
   { label: 'Ativo', value: 'active' },
+  { label: 'VIP', value: 'vip' },
   { label: 'Inativo', value: 'inactive' },
+  { label: 'Bloqueado', value: 'blocked' },
 ] as const
 
 export const CUSTOMER_TABLE_COLUMNS = [

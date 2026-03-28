@@ -12,94 +12,75 @@ useHead({
 })
 
 const { format } = useCurrency()
-const { formatDate } = useDateFormat()
-
 const searchQuery = ref('')
 const selectedStatus = ref('')
-const loading = ref(false)
+const stats = ref({
+  total: 0,
+  active: 0,
+  inactive: 0,
+  vip: 0,
+  totalRevenue: 0,
+})
+const { customers, loading, error, pagination, updateFilters, loadCustomers } = useCustomers()
+const customersService = useCustomersService()
 
-const customers = ref([
-  {
-    id: '1',
-    name: 'João Silva',
-    email: 'joao.silva@email.com',
-    phone: '(11) 99999-0001',
-    orders: 12,
-    spent: 45680,
-    lastOrder: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2),
-    status: 'active',
-  },
-  {
-    id: '2',
-    name: 'Maria Santos',
-    email: 'maria.santos@email.com',
-    phone: '(11) 99999-0002',
-    orders: 8,
-    spent: 32450,
-    lastOrder: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5),
-    status: 'active',
-  },
-  {
-    id: '3',
-    name: 'Pedro Costa',
-    email: 'pedro.costa@email.com',
-    phone: '(11) 99999-0003',
-    orders: 25,
-    spent: 128900,
-    lastOrder: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1),
-    status: 'vip',
-  },
-  {
-    id: '4',
-    name: 'Ana Oliveira',
-    email: 'ana.oliveira@email.com',
-    phone: '(11) 99999-0004',
-    orders: 3,
-    spent: 8990,
-    lastOrder: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30),
-    status: 'inactive',
-  },
-  {
-    id: '5',
-    name: 'Carlos Mendes',
-    email: 'carlos.mendes@email.com',
-    phone: '(11) 99999-0005',
-    orders: 15,
-    spent: 67800,
-    lastOrder: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
-    status: 'active',
-  },
-])
+const loadStats = async () => {
+  const response = await customersService.getStats()
 
-const stats = computed(() => ({
-  total: customers.value.length,
-  active: customers.value.filter(c => c.status === 'active').length,
-  vip: customers.value.filter(c => c.status === 'vip').length,
-  totalRevenue: customers.value.reduce((sum, c) => sum + c.spent, 0),
-}))
+  stats.value = {
+    total: response.total,
+    active: response.active,
+    inactive: response.inactive,
+    vip: customers.value.filter(customer => customer.status === 'vip').length,
+    totalRevenue: customers.value.reduce((sum, customer) => sum + customer.total_spent, 0),
+  }
+}
+
+const syncFilters = useDebounceFn(async () => {
+  updateFilters({
+    search: searchQuery.value || undefined,
+    status: (selectedStatus.value || undefined) as 'lead' | 'active' | 'inactive' | 'vip' | 'blocked' | undefined,
+  })
+
+  pagination.currentPage.value = 1
+  await loadCustomers()
+  await loadStats()
+}, 250)
+
+watch([searchQuery, selectedStatus], () => {
+  void syncFilters()
+})
+
+watch(() => pagination.currentPage.value, () => {
+  void loadCustomers()
+})
 
 const statusColors: Record<string, { bg: string; text: string; dot: string }> = {
+  lead: { bg: 'bg-sky-50', text: 'text-sky-700', dot: 'bg-sky-500' },
   active: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
   vip: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
   inactive: { bg: 'bg-slate-100', text: 'text-slate-600', dot: 'bg-slate-400' },
+  blocked: { bg: 'bg-rose-50', text: 'text-rose-700', dot: 'bg-rose-500' },
 }
 
 const statusLabels: Record<string, string> = {
+  lead: 'Lead',
   active: 'Ativo',
   vip: 'VIP',
   inactive: 'Inativo',
+  blocked: 'Bloqueado',
 }
 
-const filteredCustomers = computed(() => {
-  return customers.value.filter(customer => {
-    const matchesSearch = !searchQuery.value ||
-      customer.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      customer.email.toLowerCase().includes(searchQuery.value.toLowerCase())
+const getStatusUi = (status: string) => {
+  return {
+    color: statusColors[status] ?? statusColors.active,
+    label: statusLabels[status] ?? 'Ativo',
+  }
+}
 
-    const matchesStatus = !selectedStatus.value || customer.status === selectedStatus.value
-
-    return matchesSearch && matchesStatus
-  })
+onMounted(async () => {
+  await loadCustomers()
+  await loadStats()
 })
 </script>
 
@@ -111,7 +92,7 @@ const filteredCustomers = computed(() => {
       description="Gerencie sua base de clientes"
       :breadcrumbs="[{ label: 'Clientes' }]"
       :actions="[
-        { key: 'export', label: 'Exportar', icon: 'lucide:download', variant: 'outline' },
+        { key: 'export', label: 'Exportar', icon: 'lucide:download', variant: 'outline', to: '/admin/clientes/exportar' },
         { key: 'new', label: 'Novo Cliente', icon: 'lucide:plus', variant: 'primary', to: '/admin/clientes/novo' },
       ]"
     />
@@ -182,9 +163,11 @@ const filteredCustomers = computed(() => {
           class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
         >
           <option value="">Todos os status</option>
+          <option value="lead">Leads</option>
           <option value="active">Ativos</option>
           <option value="vip">VIP</option>
           <option value="inactive">Inativos</option>
+          <option value="blocked">Bloqueados</option>
         </select>
       </div>
 
@@ -201,9 +184,9 @@ const filteredCustomers = computed(() => {
               <th class="text-right px-5 lg:px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Ações</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-50">
+          <tbody v-if="customers.length" class="divide-y divide-slate-50">
             <tr
-              v-for="customer in filteredCustomers"
+              v-for="customer in customers"
               :key="customer.id"
               class="hover:bg-slate-50/50 transition-colors"
             >
@@ -223,18 +206,18 @@ const filteredCustomers = computed(() => {
                 <p class="text-sm text-slate-500">{{ customer.phone }}</p>
               </td>
               <td class="text-center px-4 py-4">
-                <span class="font-semibold text-slate-700">{{ customer.orders }}</span>
+                <span class="font-semibold text-slate-700">{{ customer.total_orders }}</span>
               </td>
               <td class="text-right px-4 py-4">
-                <span class="font-semibold text-slate-900">{{ format(customer.spent) }}</span>
+                <span class="font-semibold text-slate-900">{{ format(customer.total_spent) }}</span>
               </td>
               <td class="text-center px-4 py-4 hidden lg:table-cell">
                 <span
                   class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
-                  :class="[statusColors[customer.status].bg, statusColors[customer.status].text]"
+                  :class="[getStatusUi(customer.status).color.bg, getStatusUi(customer.status).color.text]"
                 >
-                  <span class="w-1.5 h-1.5 rounded-full" :class="statusColors[customer.status].dot" />
-                  {{ statusLabels[customer.status] }}
+                  <span class="w-1.5 h-1.5 rounded-full" :class="getStatusUi(customer.status).color.dot" />
+                  {{ getStatusUi(customer.status).label }}
                 </span>
               </td>
               <td class="text-right px-5 lg:px-6 py-4">
@@ -242,6 +225,7 @@ const filteredCustomers = computed(() => {
                   <NuxtLink
                     :to="`/admin/clientes/${customer.id}`"
                     class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                    title="Ver detalhes"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4" />
                   </NuxtLink>
@@ -258,17 +242,37 @@ const filteredCustomers = computed(() => {
         </table>
       </div>
 
+      <div v-if="loading" class="px-6 py-10 text-center text-sm text-slate-500">
+        Carregando clientes...
+      </div>
+
+      <div v-else-if="!customers.length" class="px-6 py-10 text-center">
+        <p class="text-sm text-slate-500">
+          {{ error?.message || 'Nenhum cliente encontrado para os filtros atuais.' }}
+        </p>
+      </div>
+
       <!-- Pagination -->
       <div class="px-5 lg:px-6 py-4 border-t border-slate-100 flex items-center justify-between">
         <p class="text-sm text-slate-500">
-          Mostrando <span class="font-medium">{{ filteredCustomers.length }}</span> de <span class="font-medium">{{ customers.length }}</span> clientes
+          Mostrando <span class="font-medium">{{ customers.length }}</span> de <span class="font-medium">{{ pagination.totalItems }}</span> clientes
         </p>
         <div class="flex items-center gap-2">
-          <button class="px-3 py-1.5 text-sm text-slate-500 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50" disabled>
+          <button
+            class="px-3 py-1.5 text-sm text-slate-500 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+            :disabled="!pagination.hasPrevPage"
+            @click="pagination.prevPage()"
+          >
             Anterior
           </button>
-          <button class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg">1</button>
-          <button class="px-3 py-1.5 text-sm text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
+          <button class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg">
+            {{ pagination.currentPage }}
+          </button>
+          <button
+            class="px-3 py-1.5 text-sm text-slate-500 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+            :disabled="!pagination.hasNextPage"
+            @click="pagination.nextPage()"
+          >
             Próximo
           </button>
         </div>

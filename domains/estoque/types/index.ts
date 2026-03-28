@@ -8,7 +8,7 @@ import type { BaseEntity, StockStatus } from '~/types'
 
 export interface StockMovement extends BaseEntity {
   product_id: string
-  type: 'entry' | 'exit' | 'adjustment' | 'transfer'
+  type: 'entry' | 'exit' | 'adjustment' | 'transfer' | 'reservation' | 'release'
   quantity: number
   previous_quantity: number
   new_quantity: number
@@ -34,6 +34,7 @@ export interface StockMovement extends BaseEntity {
 }
 
 export interface ProductStock {
+  id: string
   product_id: string
   product_name: string
   sku: string | null

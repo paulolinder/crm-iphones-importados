@@ -13,6 +13,7 @@ export type ActiveStatus = 'active' | 'inactive'
  * Status de pedido/venda
  */
 export type OrderStatus =
+  | 'draft'        // Rascunho
   | 'pending'      // Aguardando
   | 'confirmed'    // Confirmado
   | 'processing'   // Em processamento
@@ -105,6 +106,7 @@ export interface StatusConfig {
  * Mapas de configuração de status
  */
 export const ORDER_STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
+  draft: { label: 'Rascunho', color: 'secondary', icon: 'lucide:file-text' },
   pending: { label: 'Pendente', color: 'warning', icon: 'lucide:clock' },
   confirmed: { label: 'Confirmado', color: 'info', icon: 'lucide:check' },
   processing: { label: 'Processando', color: 'primary', icon: 'lucide:loader' },

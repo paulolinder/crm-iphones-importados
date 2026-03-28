@@ -40,7 +40,7 @@ const statusConfig: Record<string, { label: string; bg: string; text: string }> 
       description="Gestão de garantias dos produtos"
       :breadcrumbs="[{ label: 'Garantias' }]"
       :actions="[
-        { key: 'new', label: 'Nova Garantia', icon: 'lucide:plus', variant: 'primary' },
+        { key: 'new', label: 'Nova Garantia', icon: 'lucide:plus', variant: 'primary', to: '/admin/garantias/nova' },
       ]"
     />
 
@@ -106,7 +106,12 @@ const statusConfig: Record<string, { label: string; bg: string; text: string }> 
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-50">
-            <tr v-for="warranty in warranties" :key="warranty.id" class="hover:bg-slate-50/50">
+            <tr
+              v-for="warranty in warranties"
+              :key="warranty.id"
+              class="hover:bg-slate-50/50 cursor-pointer"
+              @click="navigateTo(`/admin/garantias/${warranty.id}`)"
+            >
               <td class="px-5 lg:px-6 py-4">
                 <p class="font-medium text-slate-900">{{ warranty.product }}</p>
               </td>

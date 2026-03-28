@@ -1,67 +1,51 @@
-/**
- * Composable para acesso ao Supabase
- *
- * Fornece acesso fácil ao cliente Supabase com tipagem completa
- */
-
+import type { Session, User } from '@supabase/supabase-js'
 import { getSupabaseClient } from '~/lib/supabase'
-import type { Database } from '~/lib/supabase'
-import type { User, Session } from '@supabase/supabase-js'
+import type { Database, Tables, TablesInsert, TablesUpdate } from '~/lib/supabase/types'
 
 export function useSupabase() {
   const client = getSupabaseClient()
-  const user = ref<User | null>(null)
-  const session = ref<Session | null>(null)
-  const loading = ref(true)
 
-  /**
-   * Inicializa o listener de autenticação
-   */
-  const initAuth = async () => {
-    loading.value = true
+  const getSession = async (): Promise<Session | null> => {
+    const { data, error } = await client.auth.getSession()
 
-    try {
-      const { data: { session: currentSession } } = await client.auth.getSession()
-      session.value = currentSession
-      user.value = currentSession?.user ?? null
+    if (error) {
+      throw error
+    }
 
-      client.auth.onAuthStateChange((_event, newSession) => {
-        session.value = newSession
-        user.value = newSession?.user ?? null
-      })
-    }
-    catch (error) {
-      console.error('Erro ao inicializar autenticação:', error)
-    }
-    finally {
-      loading.value = false
-    }
+    return data.session
   }
 
-  /**
-   * Login com email e senha
-   */
+  const getUser = async (): Promise<User | null> => {
+    const { data, error } = await client.auth.getUser()
+
+    if (error) {
+      throw error
+    }
+
+    return data.user
+  }
+
   const signIn = async (email: string, password: string) => {
     const { data, error } = await client.auth.signInWithPassword({
       email,
       password,
     })
 
-    if (error) throw error
+    if (error) {
+      throw error
+    }
+
     return data
   }
 
-  /**
-   * Logout
-   */
   const signOut = async () => {
     const { error } = await client.auth.signOut()
-    if (error) throw error
+
+    if (error) {
+      throw error
+    }
   }
 
-  /**
-   * Registro de novo usuário
-   */
   const signUp = async (email: string, password: string, metadata?: Record<string, unknown>) => {
     const { data, error } = await client.auth.signUp({
       email,
@@ -71,38 +55,35 @@ export function useSupabase() {
       },
     })
 
-    if (error) throw error
+    if (error) {
+      throw error
+    }
+
     return data
   }
 
-  /**
-   * Recuperação de senha
-   */
   const resetPassword = async (email: string) => {
     const { error } = await client.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/reset-password`,
     })
 
-    if (error) throw error
+    if (error) {
+      throw error
+    }
   }
 
-  /**
-   * Atualização de senha
-   */
   const updatePassword = async (newPassword: string) => {
-    const { error } = await client.auth.updateUser({
-      password: newPassword,
-    })
+    const { error } = await client.auth.updateUser({ password: newPassword })
 
-    if (error) throw error
+    if (error) {
+      throw error
+    }
   }
 
   return {
     client,
-    user: readonly(user),
-    session: readonly(session),
-    loading: readonly(loading),
-    initAuth,
+    getSession,
+    getUser,
     signIn,
     signOut,
     signUp,
@@ -111,23 +92,13 @@ export function useSupabase() {
   }
 }
 
-/**
- * Composable para operações de banco de dados
- */
-export function useSupabaseDB<T extends keyof Database['public']['Tables']>(table: T) {
+export function useSupabaseDB<T extends keyof Database['public']['Tables'] & string>(table: T) {
   const client = getSupabaseClient()
-
-  type Row = Database['public']['Tables'][T]['Row']
-  type Insert = Database['public']['Tables'][T]['Insert']
-  type Update = Database['public']['Tables'][T]['Update']
-
-  const data = ref<Row[]>([])
+  const data = ref<Tables<T>[]>([])
   const loading = ref(false)
   const error = ref<Error | null>(null)
+  const relation = () => client.from(table as never)
 
-  /**
-   * Busca todos os registros
-   */
   const fetchAll = async (options?: {
     columns?: string
     orderBy?: { column: string; ascending?: boolean }
@@ -138,7 +109,7 @@ export function useSupabaseDB<T extends keyof Database['public']['Tables']>(tabl
     error.value = null
 
     try {
-      let query = client.from(table).select(options?.columns ?? '*')
+      let query = relation().select(options?.columns ?? '*')
 
       if (options?.orderBy) {
         query = query.order(options.orderBy.column, {
@@ -146,126 +117,128 @@ export function useSupabaseDB<T extends keyof Database['public']['Tables']>(tabl
         })
       }
 
-      if (options?.limit) {
+      if (typeof options?.offset === 'number') {
+        const limit = options.limit ?? 10
+        query = query.range(options.offset, options.offset + limit - 1)
+      }
+      else if (options?.limit) {
         query = query.limit(options.limit)
       }
 
-      if (options?.offset) {
-        query = query.range(options.offset, options.offset + (options.limit ?? 10) - 1)
+      const { data: result, error: queryError } = await query
+
+      if (queryError) {
+        throw queryError
       }
 
-      const { data: result, error: err } = await query
-
-      if (err) throw err
-      data.value = result as Row[]
-      return result as Row[]
+      data.value = (result ?? []) as Tables<T>[]
+      return data.value
     }
-    catch (e) {
-      error.value = e as Error
-      throw e
+    catch (caughtError) {
+      error.value = caughtError as Error
+      throw caughtError
     }
     finally {
       loading.value = false
     }
   }
 
-  /**
-   * Busca um registro por ID
-   */
   const fetchById = async (id: string, columns?: string) => {
     loading.value = true
     error.value = null
 
     try {
-      const { data: result, error: err } = await client
-        .from(table)
+      const { data: result, error: queryError } = await client
+        .from(table as never)
         .select(columns ?? '*')
-        .eq('id', id)
-        .single()
+        .eq('id' as never, id)
+        .maybeSingle()
 
-      if (err) throw err
-      return result as Row
+      if (queryError) {
+        throw queryError
+      }
+
+      return result as Tables<T> | null
     }
-    catch (e) {
-      error.value = e as Error
-      throw e
+    catch (caughtError) {
+      error.value = caughtError as Error
+      throw caughtError
     }
     finally {
       loading.value = false
     }
   }
 
-  /**
-   * Cria um novo registro
-   */
-  const create = async (record: Insert) => {
+  const create = async (record: TablesInsert<T>) => {
     loading.value = true
     error.value = null
 
     try {
-      const { data: result, error: err } = await client
-        .from(table)
-        .insert(record as any)
+      const { data: result, error: queryError } = await client
+        .from(table as never)
+        .insert(record as never)
         .select()
         .single()
 
-      if (err) throw err
-      return result as Row
+      if (queryError) {
+        throw queryError
+      }
+
+      return result as Tables<T>
     }
-    catch (e) {
-      error.value = e as Error
-      throw e
+    catch (caughtError) {
+      error.value = caughtError as Error
+      throw caughtError
     }
     finally {
       loading.value = false
     }
   }
 
-  /**
-   * Atualiza um registro
-   */
-  const update = async (id: string, record: Update) => {
+  const update = async (id: string, record: TablesUpdate<T>) => {
     loading.value = true
     error.value = null
 
     try {
-      const { data: result, error: err } = await client
-        .from(table)
-        .update(record as any)
-        .eq('id', id)
+      const { data: result, error: queryError } = await client
+        .from(table as never)
+        .update(record as never)
+        .eq('id' as never, id)
         .select()
         .single()
 
-      if (err) throw err
-      return result as Row
+      if (queryError) {
+        throw queryError
+      }
+
+      return result as Tables<T>
     }
-    catch (e) {
-      error.value = e as Error
-      throw e
+    catch (caughtError) {
+      error.value = caughtError as Error
+      throw caughtError
     }
     finally {
       loading.value = false
     }
   }
 
-  /**
-   * Remove um registro
-   */
   const remove = async (id: string) => {
     loading.value = true
     error.value = null
 
     try {
-      const { error: err } = await client
-        .from(table)
+      const { error: queryError } = await client
+        .from(table as never)
         .delete()
-        .eq('id', id)
+        .eq('id' as never, id)
 
-      if (err) throw err
+      if (queryError) {
+        throw queryError
+      }
     }
-    catch (e) {
-      error.value = e as Error
-      throw e
+    catch (caughtError) {
+      error.value = caughtError as Error
+      throw caughtError
     }
     finally {
       loading.value = false

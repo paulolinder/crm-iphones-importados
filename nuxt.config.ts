@@ -66,10 +66,10 @@ export default defineNuxtConfig({
     
     // Public (exposed to client)
     public: {
-      supabaseUrl: process.env.SUPABASE_URL,
-      supabaseKey: process.env.SUPABASE_ANON_KEY,
-      appName: 'Eleve Imports CRM',
-      appVersion: '0.1.0',
+      supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL,
+      supabaseKey: process.env.NUXT_PUBLIC_SUPABASE_KEY ?? process.env.SUPABASE_ANON_KEY,
+      appName: process.env.NUXT_PUBLIC_APP_NAME ?? 'Eleve Imports CRM',
+      appVersion: process.env.NUXT_PUBLIC_APP_VERSION ?? '0.1.0',
     },
   },
 
@@ -78,6 +78,8 @@ export default defineNuxtConfig({
     dirs: [
       'composables/**',
       'utils/**',
+      '../domains/**/composables',
+      '../domains/**/services',
     ],
   },
 

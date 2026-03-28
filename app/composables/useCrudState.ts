@@ -15,80 +15,80 @@ interface CrudState<T> {
 }
 
 export function useCrudState<T extends { id: string }>(initialData: T[] = []) {
-  const state = reactive<CrudState<T>>({
-    data: initialData,
-    selectedItem: null,
-    loading: false,
-    error: null,
-    operation: null,
-  })
+  const data = shallowRef<T[]>([...initialData])
+  const selectedItem = shallowRef<T | null>(null)
+  const loading = ref(false)
+  const error = shallowRef<Error | null>(null)
+  const operation = shallowRef<CrudOperation | null>(null)
 
-  const isLoading = computed(() => state.loading)
-  const hasError = computed(() => state.error !== null)
-  const isEmpty = computed(() => state.data.length === 0)
-  const currentOperation = computed(() => state.operation)
+  const isLoading = computed(() => loading.value)
+  const hasError = computed(() => error.value !== null)
+  const isEmpty = computed(() => data.value.length === 0)
+  const currentOperation = computed(() => operation.value)
 
-  const setLoading = (loading: boolean, operation?: CrudOperation) => {
-    state.loading = loading
-    state.operation = loading ? operation ?? null : null
-    if (loading) {
-      state.error = null
+  const setLoading = (value: boolean, nextOperation?: CrudOperation) => {
+    loading.value = value
+    operation.value = value ? nextOperation ?? null : null
+
+    if (value) {
+      error.value = null
     }
   }
 
-  const setError = (error: Error | null) => {
-    state.error = error
-    state.loading = false
+  const setError = (nextError: Error | null) => {
+    error.value = nextError
+    loading.value = false
   }
 
-  const setData = (data: T[]) => {
-    state.data = data
-    state.loading = false
-    state.error = null
+  const setData = (nextData: T[]) => {
+    data.value = nextData
+    loading.value = false
+    error.value = null
   }
 
   const addItem = (item: T) => {
-    state.data.unshift(item)
+    data.value = [item, ...data.value]
   }
 
   const updateItem = (id: string, updates: Partial<T>) => {
-    const index = state.data.findIndex((item) => item.id === id)
-    if (index !== -1) {
-      state.data[index] = { ...state.data[index], ...updates }
-    }
+    data.value = data.value.map(item => item.id === id ? { ...item, ...updates } : item)
   }
 
   const removeItem = (id: string) => {
-    const index = state.data.findIndex((item) => item.id === id)
-    if (index !== -1) {
-      state.data.splice(index, 1)
-    }
+    data.value = data.value.filter(item => item.id !== id)
   }
 
   const selectItem = (item: T | null) => {
-    state.selectedItem = item
+    selectedItem.value = item
   }
 
   const clearSelection = () => {
-    state.selectedItem = null
+    selectedItem.value = null
   }
 
   const reset = () => {
-    state.data = []
-    state.selectedItem = null
-    state.loading = false
-    state.error = null
-    state.operation = null
+    data.value = []
+    selectedItem.value = null
+    loading.value = false
+    error.value = null
+    operation.value = null
   }
 
   const findById = (id: string): T | undefined => {
-    return state.data.find((item) => item.id === id)
+    return data.value.find(item => item.id === id)
   }
 
   return {
-    state: readonly(state),
-    data: computed(() => state.data),
-    selectedItem: computed(() => state.selectedItem),
+    state: computed<CrudState<T>>(() => ({
+      data: data.value,
+      selectedItem: selectedItem.value,
+      loading: loading.value,
+      error: error.value,
+      operation: operation.value,
+    })),
+    data: readonly(data),
+    selectedItem: readonly(selectedItem),
+    error: readonly(error),
     isLoading,
     hasError,
     isEmpty,

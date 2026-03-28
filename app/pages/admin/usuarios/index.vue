@@ -42,6 +42,7 @@ const statusColors: Record<string, string> = {
       description="Gerencie os usuários do sistema"
       :breadcrumbs="[{ label: 'Usuários' }]"
       :actions="[
+        { key: 'perm', label: 'Permissões', icon: 'lucide:shield', variant: 'outline', to: '/admin/permissoes' },
         { key: 'new', label: 'Novo Usuário', icon: 'lucide:user-plus', variant: 'primary', to: '/admin/usuarios/novo' },
       ]"
     />
@@ -102,13 +103,27 @@ const statusColors: Record<string, string> = {
         <div class="flex items-center justify-between">
           <span
             class="px-3 py-1 rounded-full text-xs font-medium"
-            :class="roleConfig[user.role].color"
+            :class="roleConfig[user.role]?.color ?? 'text-slate-600 bg-slate-100'"
           >
-            {{ roleConfig[user.role].label }}
+            {{ roleConfig[user.role]?.label ?? user.role }}
           </span>
           <span class="text-xs text-slate-400">
             Último acesso: {{ formatDate(user.lastLogin, 'dd/MM HH:mm') }}
           </span>
+        </div>
+        <div class="mt-4 flex gap-2 pt-4 border-t border-slate-100">
+          <NuxtLink
+            :to="`/admin/usuarios/${user.id}`"
+            class="flex-1 text-center py-2 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200"
+          >
+            Perfil
+          </NuxtLink>
+          <NuxtLink
+            :to="`/admin/usuarios/${user.id}/editar`"
+            class="flex-1 text-center py-2 text-xs font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+          >
+            Editar
+          </NuxtLink>
         </div>
       </div>
     </div>

@@ -16,3 +16,9 @@ export * from './vendas/types'
 
 // Estoque
 export * from './estoque/types'
+
+// Financeiro
+export * from './financeiro/types'
+
+// Auth
+export * from './auth/types'

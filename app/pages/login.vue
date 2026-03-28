@@ -15,8 +15,8 @@ const email = ref('')
 const password = ref('')
 const rememberMe = ref(false)
 const showPassword = ref(false)
-const loading = ref(false)
 const error = ref('')
+const { signIn, isLoading } = useAuth()
 
 const handleLogin = async () => {
   if (!email.value || !password.value) {
@@ -24,16 +24,13 @@ const handleLogin = async () => {
     return
   }
 
-  loading.value = true
   error.value = ''
 
   try {
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    navigateTo('/admin/dashboard')
+    await signIn(email.value, password.value)
+    await navigateTo('/admin/dashboard')
   } catch (err) {
-    error.value = 'Credenciais inválidas'
-  } finally {
-    loading.value = false
+    error.value = err instanceof Error ? err.message : 'Credenciais inválidas'
   }
 }
 </script>
@@ -154,7 +151,7 @@ const handleLogin = async () => {
                 type="email"
                 placeholder="seu@email.com"
                 class="form-input pl-12"
-                :disabled="loading"
+                :disabled="isLoading"
               />
             </div>
           </div>
@@ -173,7 +170,7 @@ const handleLogin = async () => {
                 :type="showPassword ? 'text' : 'password'"
                 placeholder="••••••••"
                 class="form-input pl-12 pr-12"
-                :disabled="loading"
+                :disabled="isLoading"
               />
               <button
                 type="button"
@@ -192,7 +189,7 @@ const handleLogin = async () => {
                 v-model="rememberMe"
                 type="checkbox"
                 class="form-checkbox"
-                :disabled="loading"
+                :disabled="isLoading"
               />
               <span class="text-sm text-slate-600">Lembrar de mim</span>
             </label>
@@ -208,9 +205,9 @@ const handleLogin = async () => {
           <button
             type="submit"
             class="w-full btn-primary py-3"
-            :disabled="loading"
+            :disabled="isLoading"
           >
-            <span v-if="loading" class="flex items-center justify-center gap-2">
+            <span v-if="isLoading" class="flex items-center justify-center gap-2">
               <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               Entrando...
             </span>

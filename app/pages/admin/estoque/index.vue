@@ -14,33 +14,48 @@ useHead({
 const { format } = useCurrency()
 
 const activeTab = ref<'overview' | 'movements' | 'imei'>('overview')
+const { stockItems, stockLoading, stockError, movements, movementsLoading, movementsError, loadStock, loadMovements } = useInventory()
+const inventoryService = useInventoryService()
+const stats = ref({
+  totalItems: 0,
+  totalValue: 0,
+  lowStock: 0,
+  outOfStock: 0,
+})
 
-const stats = computed(() => ({
-  totalItems: 1256,
-  totalValue: 2450000,
-  lowStock: 12,
-  outOfStock: 3,
-}))
+const refreshStats = async () => {
+  const response = await inventoryService.getStats()
+  stats.value = {
+    totalItems: response.total_items,
+    totalValue: response.total_value,
+    lowStock: response.low_stock_count,
+    outOfStock: response.out_of_stock_count,
+  }
+}
 
-const stockItems = ref([
-  { id: '1', name: 'iPhone 15 Pro Max 256GB', sku: 'IPH15PM256', stock: 12, reserved: 2, available: 10, minStock: 5, status: 'ok' },
-  { id: '2', name: 'iPhone 15 128GB', sku: 'IPH15128', stock: 25, reserved: 5, available: 20, minStock: 10, status: 'ok' },
-  { id: '3', name: 'AirPods Pro 2', sku: 'APP2', stock: 3, reserved: 1, available: 2, minStock: 10, status: 'low' },
-  { id: '4', name: 'Apple Watch Ultra 2', sku: 'AWU2', stock: 8, reserved: 0, available: 8, minStock: 5, status: 'ok' },
-  { id: '5', name: 'MacBook Air M3', sku: 'MBA-M3', stock: 0, reserved: 0, available: 0, minStock: 3, status: 'out' },
-])
+watch(activeTab, async (tab) => {
+  if (tab === 'movements') {
+    await loadMovements()
+    return
+  }
 
-const recentMovements = ref([
-  { id: '1', type: 'entry', product: 'iPhone 15 Pro Max', qty: 20, date: new Date(Date.now() - 1000 * 60 * 30), user: 'Admin' },
-  { id: '2', type: 'exit', product: 'AirPods Pro 2', qty: 5, date: new Date(Date.now() - 1000 * 60 * 60), user: 'Vendedor' },
-  { id: '3', type: 'entry', product: 'Apple Watch S9', qty: 10, date: new Date(Date.now() - 1000 * 60 * 120), user: 'Admin' },
-])
+  if (tab === 'overview') {
+    await loadStock()
+  }
+})
+
+onMounted(async () => {
+  await loadStock()
+  await refreshStats()
+})
 
 const statusConfig: Record<string, { label: string; bg: string; text: string }> = {
-  ok: { label: 'Normal', bg: 'bg-emerald-50', text: 'text-emerald-700' },
-  low: { label: 'Baixo', bg: 'bg-amber-50', text: 'text-amber-700' },
-  out: { label: 'Zerado', bg: 'bg-red-50', text: 'text-red-700' },
+  in_stock: { label: 'Normal', bg: 'bg-emerald-50', text: 'text-emerald-700' },
+  low_stock: { label: 'Baixo', bg: 'bg-amber-50', text: 'text-amber-700' },
+  out_of_stock: { label: 'Zerado', bg: 'bg-red-50', text: 'text-red-700' },
 }
+
+const getStockUi = (status: string) => statusConfig[status] ?? statusConfig.in_stock
 </script>
 
 <template>
@@ -51,7 +66,8 @@ const statusConfig: Record<string, { label: string; bg: string; text: string }> 
       description="Controle de estoque e movimentações"
       :breadcrumbs="[{ label: 'Estoque' }]"
       :actions="[
-        { key: 'exit', label: 'Saída', icon: 'lucide:package-minus', variant: 'outline' },
+        { key: 'mov', label: 'Movimentações', icon: 'lucide:arrow-left-right', variant: 'ghost', to: '/admin/estoque/movimentacoes' },
+        { key: 'exit', label: 'Saída', icon: 'lucide:package-minus', variant: 'outline', to: '/admin/estoque/saida' },
         { key: 'entry', label: 'Entrada', icon: 'lucide:package-plus', variant: 'primary', to: '/admin/estoque/entrada' },
       ]"
     />
@@ -141,15 +157,15 @@ const statusConfig: Record<string, { label: string; bg: string; text: string }> 
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-50">
-              <tr v-for="item in stockItems" :key="item.id" class="hover:bg-slate-50/50">
+              <tr v-for="item in stockItems" :key="item.product_id" class="hover:bg-slate-50/50">
                 <td class="py-4">
                   <div>
-                    <p class="font-medium text-slate-900">{{ item.name }}</p>
+                    <p class="font-medium text-slate-900">{{ item.product_name }}</p>
                     <p class="text-sm text-slate-500">{{ item.sku }}</p>
                   </div>
                 </td>
                 <td class="text-center py-4">
-                  <span class="font-semibold text-slate-700">{{ item.stock }}</span>
+                  <span class="font-semibold text-slate-700">{{ item.quantity }}</span>
                 </td>
                 <td class="text-center py-4 hidden md:table-cell">
                   <span class="text-slate-500">{{ item.reserved }}</span>
@@ -158,8 +174,8 @@ const statusConfig: Record<string, { label: string; bg: string; text: string }> 
                   <span
                     class="font-semibold"
                     :class="[
-                      item.available >= item.minStock ? 'text-emerald-600' : '',
-                      item.available < item.minStock && item.available > 0 ? 'text-amber-600' : '',
+                      item.available >= item.min_stock ? 'text-emerald-600' : '',
+                      item.available < item.min_stock && item.available > 0 ? 'text-amber-600' : '',
                       item.available === 0 ? 'text-red-600' : '',
                     ]"
                   >
@@ -169,21 +185,29 @@ const statusConfig: Record<string, { label: string; bg: string; text: string }> 
                 <td class="text-center py-4 hidden lg:table-cell">
                   <span
                     class="px-2.5 py-1 rounded-full text-xs font-medium"
-                    :class="[statusConfig[item.status].bg, statusConfig[item.status].text]"
+                    :class="[getStockUi(item.status).bg, getStockUi(item.status).text]"
                   >
-                    {{ statusConfig[item.status].label }}
+                    {{ getStockUi(item.status).label }}
                   </span>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
+
+        <div v-if="stockLoading" class="pt-6 text-center text-sm text-slate-500">
+          Carregando estoque...
+        </div>
+
+        <div v-else-if="!stockItems.length" class="pt-6 text-center text-sm text-slate-500">
+          {{ stockError?.message || 'Nenhum item de estoque encontrado.' }}
+        </div>
       </div>
 
       <div v-else-if="activeTab === 'movements'" class="p-5 lg:p-6">
         <div class="space-y-4">
           <div
-            v-for="movement in recentMovements"
+            v-for="movement in movements"
             :key="movement.id"
             class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl"
           >
@@ -194,14 +218,22 @@ const statusConfig: Record<string, { label: string; bg: string; text: string }> 
               <Icon :name="movement.type === 'entry' ? 'lucide:arrow-down' : 'lucide:arrow-up'" class="w-5 h-5" />
             </div>
             <div class="flex-1">
-              <p class="font-medium text-slate-900">{{ movement.product }}</p>
-              <p class="text-sm text-slate-500">{{ movement.type === 'entry' ? 'Entrada' : 'Saída' }} de {{ movement.qty }} unidades</p>
+              <p class="font-medium text-slate-900">{{ movement.product?.name || 'Produto' }}</p>
+              <p class="text-sm text-slate-500">{{ movement.type === 'entry' ? 'Entrada' : 'Saída' }} de {{ movement.quantity }} unidades</p>
             </div>
             <div class="text-right text-sm text-slate-500">
-              <p>{{ movement.user }}</p>
-              <p class="text-xs">há {{ Math.round((Date.now() - movement.date.getTime()) / 60000) }} min</p>
+              <p>{{ movement.user?.name || 'Sistema' }}</p>
+              <p class="text-xs">há {{ Math.round((Date.now() - new Date(movement.created_at).getTime()) / 60000) }} min</p>
             </div>
           </div>
+        </div>
+
+        <div v-if="movementsLoading" class="pt-6 text-center text-sm text-slate-500">
+          Carregando movimentações...
+        </div>
+
+        <div v-else-if="!movements.length" class="pt-6 text-center text-sm text-slate-500">
+          {{ movementsError?.message || 'Nenhuma movimentação registrada até o momento.' }}
         </div>
       </div>
 

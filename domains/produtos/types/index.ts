@@ -26,6 +26,8 @@ export interface Product extends BaseEntity {
   warranty_months: number | null
   active: boolean
   featured: boolean
+  status: 'draft' | 'active' | 'inactive' | 'archived'
+  is_trackable?: boolean
   
   // Relations (populated)
   category?: ProductCategory
@@ -76,6 +78,8 @@ export interface ProductFormData {
   warranty_months?: number
   active?: boolean
   featured?: boolean
+  status?: 'draft' | 'active' | 'inactive' | 'archived'
+  is_trackable?: boolean
 }
 
 export interface ProductFilters {
