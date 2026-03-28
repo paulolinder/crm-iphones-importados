@@ -20,6 +20,9 @@ const { signIn, isLoading } = useAuth()
 
 function formatLoginError(err: unknown): string {
   const raw = err instanceof Error ? err.message : String(err)
+  if (/database error querying schema/i.test(raw)) {
+    return 'Erro no servidor de autenticação (dados do usuário no Supabase). Se o usuário foi criado por SQL, rode a migration auth_users_gotrue_string_defaults ou crie o usuário pelo painel Authentication → Users. Veja docs/supabase-setup.md.'
+  }
   if (/invalid login credentials|invalid_credentials/i.test(raw)) {
     return 'E-mail ou senha incorretos. Se o banco ainda não tem nenhum usuário, crie um no Supabase (Authentication → Users) ou rode o script supabase/scripts/create_demo_admin_user.sql.'
   }

@@ -22,7 +22,13 @@ with new_user as (
     created_at,
     updated_at,
     confirmation_token,
-    recovery_token
+    recovery_token,
+    email_change,
+    email_change_token_new,
+    email_change_token_current,
+    reauthentication_token,
+    phone_change,
+    phone_change_token
   ) values (
     '00000000-0000-0000-0000-000000000000',
     gen_random_uuid(),
@@ -35,6 +41,12 @@ with new_user as (
     jsonb_build_object('full_name', 'Administrador'),
     now(),
     now(),
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
     '',
     ''
   )

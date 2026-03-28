@@ -17,6 +17,9 @@ The app also accepts `SUPABASE_URL` and `SUPABASE_ANON_KEY` as fallback values v
 ## Applied Migrations
 1. `202603290001_crm_schema.sql`
 2. `202603290002_crm_security_and_seeds.sql`
+3. `202603291200_user_roles_default.sql` (papéis padrão / backfill)
+4. `202603291400_brands_insert_for_product_creators.sql` (INSERT em `brands` com `products.create`)
+5. `202603291500_auth_users_gotrue_string_defaults.sql` (corrige NULL em `auth.users` para login)
 
 ## What The Setup Creates
 - Extensions: `pgcrypto`, `citext`
@@ -44,6 +47,25 @@ After regeneration, keep the helper aliases at the bottom of `app/lib/supabase/t
 - `app/composables/usePermissions.ts`
 - `app/middleware/auth.ts`
 - `app/middleware/admin.ts`
+
+## Login: "Database error querying schema"
+Se o usuário foi criado por **SQL direto** em `auth.users`, campos de texto do Auth podem ficar **NULL**. O GoTrue espera **string vazia** em várias colunas (`email_change`, tokens, etc.) e o login falha com esse erro.
+
+**Correção:** rode a migration `202603291500_auth_users_gotrue_string_defaults.sql` ou, no SQL Editor:
+
+```sql
+update auth.users set
+  email_change = coalesce(email_change, ''),
+  email_change_token_new = coalesce(email_change_token_new, ''),
+  email_change_token_current = coalesce(email_change_token_current, ''),
+  recovery_token = coalesce(recovery_token, ''),
+  confirmation_token = coalesce(confirmation_token, ''),
+  reauthentication_token = coalesce(reauthentication_token, ''),
+  phone_change = coalesce(phone_change, ''),
+  phone_change_token = coalesce(phone_change_token, '');
+```
+
+Prefira criar usuários pelo painel **Authentication → Users** ou use `supabase/scripts/create_demo_admin_user.sql` (já preenche esses campos).
 
 ## Primeiro login (usuário ainda não existe)
 Se `auth.users` estiver **vazio**, o login com `admin@eleveimports.com` / `123456` falha com credenciais inválidas.
