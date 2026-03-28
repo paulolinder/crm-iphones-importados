@@ -45,6 +45,14 @@ After regeneration, keep the helper aliases at the bottom of `app/lib/supabase/t
 - `app/middleware/auth.ts`
 - `app/middleware/admin.ts`
 
+## Primeiro login (usuário ainda não existe)
+Se `auth.users` estiver **vazio**, o login com `admin@eleveimports.com` / `123456` falha com credenciais inválidas.
+
+1. **Painel Supabase:** Authentication → Users → **Add user** → e-mail confirmado + senha.
+2. **SQL (dev):** rode `supabase/scripts/create_demo_admin_user.sql` no SQL Editor (cria o mesmo par da tela de login e a linha em `auth.identities`).
+
+O trigger `handle_new_user` cria `profiles` e, para o **primeiro** perfil, atribui o papel `admin`.
+
 ## Auth Flow Summary
 1. User signs in through Supabase Auth.
 2. `useAuth()` syncs the session and loads `profiles`, `user_roles`, and resolved permissions.

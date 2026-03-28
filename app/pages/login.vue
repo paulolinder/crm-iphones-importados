@@ -18,6 +18,14 @@ const showPassword = ref(false)
 const error = ref('')
 const { signIn, isLoading } = useAuth()
 
+function formatLoginError(err: unknown): string {
+  const raw = err instanceof Error ? err.message : String(err)
+  if (/invalid login credentials|invalid_credentials/i.test(raw)) {
+    return 'E-mail ou senha incorretos. Se o banco ainda não tem nenhum usuário, crie um no Supabase (Authentication → Users) ou rode o script supabase/scripts/create_demo_admin_user.sql.'
+  }
+  return raw || 'Não foi possível entrar. Tente novamente.'
+}
+
 const handleLogin = async () => {
   if (!email.value || !password.value) {
     error.value = 'Preencha todos os campos'
@@ -30,7 +38,7 @@ const handleLogin = async () => {
     await signIn(email.value, password.value)
     await navigateTo('/admin/dashboard')
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Credenciais inválidas'
+    error.value = formatLoginError(err)
   }
 }
 </script>
