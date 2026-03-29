@@ -437,7 +437,12 @@ export function useOrdersService() {
     if (status === 'confirmed') patch.confirmed_at = new Date().toISOString()
     if (status === 'shipped') patch.shipped_at = new Date().toISOString()
     if (status === 'delivered') patch.delivered_at = new Date().toISOString()
-    if (status === 'cancelled') patch.cancelled_at = new Date().toISOString()
+    if (status === 'cancelled') {
+      patch.cancelled_at = new Date().toISOString()
+      if (notes) {
+        patch.cancellation_reason = notes
+      }
+    }
 
     const { error } = await client
       .from('orders')

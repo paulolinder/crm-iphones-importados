@@ -10,6 +10,8 @@ export function useOrders() {
       payment_status: undefined,
       customer_id: undefined,
       seller_id: undefined,
+      date_from: undefined,
+      date_to: undefined,
     },
   })
   const pagination = usePagination()

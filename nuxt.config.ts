@@ -19,8 +19,9 @@ export default defineNuxtConfig({
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
       ],
     },
-    pageTransition: { name: 'page', mode: 'out-in' },
-    layoutTransition: { name: 'layout', mode: 'out-in' },
+    // Sem mode 'out-in': evita área principal ficar em branco após trocar de rota em alguns casos
+    pageTransition: { name: 'page' },
+    layoutTransition: { name: 'layout' },
   },
 
   // Source directory (Nuxt 4 convention)
@@ -121,7 +122,8 @@ export default defineNuxtConfig({
   // Experimental features
   experimental: {
     typedPages: true,
-    viewTransition: true,
+    // View Transitions API experimental + page transitions costumam causar tela branca em algumas rotas/navegadores
+    viewTransition: false,
   },
 
   // Compatibility date
