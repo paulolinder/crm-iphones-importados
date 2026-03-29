@@ -12,6 +12,10 @@ useHead({
 
 const { success, error: showError } = useToast()
 const service = useProductsService()
+const { uploadProductImage } = useProductImageUpload()
+
+const productImageUrl = ref('')
+const productImageFile = ref<File | null>(null)
 const categories = ref<{ id: string, name: string }[]>([])
 const brands = ref<{ id: string, name: string }[]>([])
 
@@ -56,6 +60,15 @@ const handleSubmit = async () => {
 
   try {
     const totalCost = computeTotalCost(costBreakdown.value)
+
+    let images: string[] | undefined
+    if (productImageFile.value) {
+      images = [await uploadProductImage(productImageFile.value)]
+    }
+    else if (productImageUrl.value.trim()) {
+      images = [productImageUrl.value.trim()]
+    }
+
     await service.create({
       name: form.name,
       sku: form.sku,
@@ -70,6 +83,7 @@ const handleSubmit = async () => {
       status: form.status,
       description: form.description,
       is_trackable: form.is_trackable,
+      images,
     })
 
     success('Produto criado', 'O produto foi salvo com sucesso.')
@@ -132,6 +146,11 @@ const handleSubmit = async () => {
             v-model="form.brand_id"
             :brands="brands"
             @brand-created="onBrandCreated"
+          />
+
+          <AdminProductImageField
+            v-model:url="productImageUrl"
+            v-model:file="productImageFile"
           />
 
           <div>

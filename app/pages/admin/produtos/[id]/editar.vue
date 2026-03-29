@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ProductCostBreakdownInput } from '~~/domains/produtos/cost-breakdown'
+import type { ProductFormData } from '~~/domains/produtos/types'
 import { computeTotalCost } from '~~/domains/produtos/cost-breakdown'
 
 definePageMeta({
@@ -14,6 +15,11 @@ const route = useRoute()
 const productId = computed(() => Array.isArray(route.params.id) ? route.params.id[0] : String(route.params.id ?? ''))
 const { success, error: showError } = useToast()
 const service = useProductsService()
+const { uploadProductImage } = useProductImageUpload()
+
+const productImageUrl = ref('')
+const productImageFile = ref<File | null>(null)
+const productImageDirty = ref(false)
 const categories = ref<{ id: string, name: string }[]>([])
 const brands = ref<{ id: string, name: string }[]>([])
 
@@ -68,6 +74,9 @@ onMounted(async () => {
     form.status = product.status
     form.description = product.description ?? ''
     form.is_trackable = product.is_trackable ?? false
+    productImageUrl.value = product.images[0] ?? ''
+    productImageFile.value = null
+    productImageDirty.value = false
   }
   catch (err) {
     submitError.value = err instanceof Error ? err.message : 'Não foi possível carregar o produto.'
@@ -83,7 +92,8 @@ const handleSubmit = async () => {
 
   try {
     const totalCost = computeTotalCost(costBreakdown.value)
-    await service.update(productId.value, {
+
+    const patch: Partial<ProductFormData> = {
       name: form.name,
       sku: form.sku,
       category_id: form.category_id || undefined,
@@ -97,7 +107,21 @@ const handleSubmit = async () => {
       status: form.status,
       description: form.description,
       is_trackable: form.is_trackable,
-    })
+    }
+
+    if (productImageDirty.value) {
+      if (productImageFile.value) {
+        patch.images = [await uploadProductImage(productImageFile.value)]
+      }
+      else if (productImageUrl.value.trim()) {
+        patch.images = [productImageUrl.value.trim()]
+      }
+      else {
+        patch.images = []
+      }
+    }
+
+    await service.update(productId.value, patch)
 
     success('Produto atualizado', 'As alterações foram salvas com sucesso.')
     await navigateTo('/admin/produtos')
@@ -161,6 +185,12 @@ const handleSubmit = async () => {
             v-model="form.brand_id"
             :brands="brands"
             @brand-created="onBrandCreated"
+          />
+
+          <AdminProductImageField
+            v-model:url="productImageUrl"
+            v-model:file="productImageFile"
+            @interacted="productImageDirty = true"
           />
 
           <div>
