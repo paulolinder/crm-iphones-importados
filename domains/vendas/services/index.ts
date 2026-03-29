@@ -38,6 +38,8 @@ function mapOrder(
     total: normalizeCurrencyValue(order.total_amount),
     notes: order.notes,
     internal_notes: order.internal_notes,
+    commercial_document_path: order.commercial_document_path ?? null,
+    commercial_document_updated_at: order.commercial_document_updated_at ?? null,
     shipped_at: order.shipped_at,
     delivered_at: order.delivered_at,
     cancelled_at: order.cancelled_at,

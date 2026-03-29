@@ -10,7 +10,11 @@ const orderId = computed(() => {
 })
 
 const { format } = useCurrency()
+const { formatDateTime } = useDateFormat()
 const service = useOrdersService()
+const { downloadFreshPdfWithToast, downloadStoredPdfWithToast } = useOrderCommercialDocument()
+const pdfBusy = ref(false)
+const storedPdfBusy = ref(false)
 const order = ref<Order | null>(null)
 const loading = ref(true)
 const loadError = ref<string | null>(null)
@@ -50,6 +54,32 @@ function openPrintPedido() {
   window.open(`/admin/vendas/${orderId.value}/imprimir`, '_blank', 'noopener,noreferrer')
 }
 
+async function downloadPdfFromDetail() {
+  if (!order.value || pdfBusy.value) {
+    return
+  }
+  pdfBusy.value = true
+  try {
+    await downloadFreshPdfWithToast(orderId.value, order.value.number)
+  }
+  finally {
+    pdfBusy.value = false
+  }
+}
+
+async function downloadStoredFromDetail() {
+  if (!order.value || storedPdfBusy.value) {
+    return
+  }
+  storedPdfBusy.value = true
+  try {
+    await downloadStoredPdfWithToast(orderId.value, order.value.number)
+  }
+  finally {
+    storedPdfBusy.value = false
+  }
+}
+
 const detailActions = computed(() => [
   {
     key: 'edit',
@@ -64,6 +94,16 @@ const detailActions = computed(() => [
     icon: 'lucide:printer',
     variant: 'outline' as const,
     onClick: openPrintPedido,
+  },
+  {
+    key: 'pdf',
+    label: pdfBusy.value ? 'Gerando PDF…' : 'Baixar PDF',
+    icon: 'lucide:file-down',
+    variant: 'outline' as const,
+    disabled: pdfBusy.value,
+    onClick: () => {
+      void downloadPdfFromDetail()
+    },
   },
   { key: 'list', label: 'Voltar', variant: 'outline' as const, to: '/admin/vendas' },
 ])
@@ -118,6 +158,60 @@ const detailActions = computed(() => [
           <p class="mt-2 text-sm text-slate-800">
             {{ order.seller?.name || '—' }}
           </p>
+        </div>
+      </div>
+
+      <div
+        class="rounded-2xl border p-5 sm:p-6"
+        :class="order.commercial_document_path
+          ? 'border-emerald-200 bg-emerald-50/60'
+          : 'border-slate-100 bg-white shadow-sm'"
+      >
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-900">
+              Documento comercial (PDF)
+            </h3>
+            <p class="mt-1 text-xs text-slate-600 max-w-xl">
+              Gere o arquivo com os dados atuais ou baixe a última versão salva no pedido (útil para WhatsApp e arquivo).
+            </p>
+            <p
+              v-if="order.commercial_document_path && order.commercial_document_updated_at"
+              class="mt-2 text-xs font-medium text-emerald-800"
+            >
+              Último anexo: {{ formatDateTime(order.commercial_document_updated_at) }}
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2 shrink-0">
+            <button
+              type="button"
+              :disabled="pdfBusy"
+              class="btn btn-outline min-h-11"
+              @click="downloadPdfFromDetail"
+            >
+              <Icon name="lucide:file-down" class="w-4 h-4" />
+              {{ pdfBusy ? 'Gerando…' : 'PDF atual' }}
+            </button>
+            <button
+              v-if="order.commercial_document_path"
+              type="button"
+              :disabled="storedPdfBusy"
+              class="btn btn-outline min-h-11 border-emerald-300 bg-white"
+              @click="downloadStoredFromDetail"
+            >
+              <Icon name="lucide:archive" class="w-4 h-4" />
+              {{ storedPdfBusy ? 'Baixando…' : 'PDF anexo' }}
+            </button>
+            <NuxtLink
+              :to="`/admin/vendas/${orderId}/imprimir`"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-primary min-h-11"
+            >
+              <Icon name="lucide:printer" class="w-4 h-4" />
+              Tela impressão
+            </NuxtLink>
+          </div>
         </div>
       </div>
 

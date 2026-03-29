@@ -110,31 +110,91 @@ function printPage() {
     window.print()
   }
 }
+
+const {
+  downloadFreshPdfWithToast,
+  attachPdfWithToast,
+} = useOrderCommercialDocument()
+
+const pdfBusy = ref(false)
+const attachBusy = ref(false)
+
+async function onDownloadPdf() {
+  if (!order.value || pdfBusy.value) {
+    return
+  }
+  pdfBusy.value = true
+  try {
+    await downloadFreshPdfWithToast(orderId.value, order.value.number)
+  }
+  finally {
+    pdfBusy.value = false
+  }
+}
+
+async function onSavePdfToOrder() {
+  if (!order.value || attachBusy.value) {
+    return
+  }
+  attachBusy.value = true
+  try {
+    await attachPdfWithToast(orderId.value, async () => {
+      const svc = useOrdersService()
+      order.value = await svc.getById(orderId.value)
+    })
+  }
+  finally {
+    attachBusy.value = false
+  }
+}
 </script>
 
 <template>
   <div class="print-root min-h-screen bg-slate-100 text-slate-900 print:bg-white print:min-h-0">
     <!-- Barra de ação (não imprime) -->
     <div
-      class="no-print sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 shadow-sm"
+      class="no-print sticky top-0 z-10 flex flex-col gap-3 border-b border-slate-200 bg-white px-4 py-3 shadow-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
     >
-      <p class="text-sm text-slate-600">
+      <p class="text-sm text-slate-600 min-w-0">
         Gere o documento para o cliente assinar. Na janela que abrir, escolha impressora ou <strong class="font-medium text-slate-800">Salvar como PDF</strong>.
+        <span v-if="order?.commercial_document_updated_at" class="mt-1 block text-xs text-emerald-700">
+          Há PDF salvo neste pedido em {{ formatDateTime(order.commercial_document_updated_at) }}.
+        </span>
       </p>
-      <div class="flex flex-wrap gap-2">
+      <div class="flex flex-wrap gap-2 sm:justify-end">
         <NuxtLink
           :to="`/admin/vendas/${orderId}`"
-          class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 active:bg-slate-100"
         >
           Voltar ao pedido
         </NuxtLink>
         <button
           type="button"
-          class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+          class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 active:bg-primary-800"
           @click="printPage"
         >
-          <Icon name="lucide:printer" class="w-4 h-4" />
+          <Icon name="lucide:printer" class="w-4 h-4 shrink-0" />
           Gerar impressão
+        </button>
+        <button
+          v-if="order"
+          type="button"
+          :disabled="pdfBusy"
+          class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-60"
+          @click="onDownloadPdf"
+        >
+          <Icon name="lucide:file-down" class="w-4 h-4 shrink-0" />
+          {{ pdfBusy ? 'Gerando…' : 'Baixar PDF' }}
+        </button>
+        <button
+          v-if="order"
+          type="button"
+          :disabled="attachBusy"
+          class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-900 hover:bg-emerald-100 disabled:opacity-60"
+          @click="onSavePdfToOrder"
+        >
+          <Icon name="lucide:save" class="w-4 h-4 shrink-0" />
+          {{ attachBusy ? 'Salvando…' : 'Salvar no pedido' }}
         </button>
       </div>
     </div>

@@ -1071,6 +1071,8 @@ export type Database = {
         Row: {
           cancellation_reason: string | null
           cancelled_at: string | null
+          commercial_document_path: string | null
+          commercial_document_updated_at: string | null
           confirmed_at: string | null
           created_at: string
           customer_id: string
@@ -1094,6 +1096,8 @@ export type Database = {
         Insert: {
           cancellation_reason?: string | null
           cancelled_at?: string | null
+          commercial_document_path?: string | null
+          commercial_document_updated_at?: string | null
           confirmed_at?: string | null
           created_at?: string
           customer_id: string
@@ -1117,6 +1121,8 @@ export type Database = {
         Update: {
           cancellation_reason?: string | null
           cancelled_at?: string | null
+          commercial_document_path?: string | null
+          commercial_document_updated_at?: string | null
           confirmed_at?: string | null
           created_at?: string
           customer_id?: string

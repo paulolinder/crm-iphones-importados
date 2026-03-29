@@ -63,10 +63,14 @@ watch(mobileOpen, (open) => {
       <!-- Header -->
       <AppHeader :is-mobile="isMobile" />
 
-      <!-- Page Content -->
-      <main class="pt-16 lg:pt-[72px] min-h-screen">
+      <!-- Page Content — espaço extra no mobile para a barra de balcão + safe area -->
+      <main
+        class="pt-16 lg:pt-[72px] min-h-screen pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:pb-0"
+      >
         <slot />
       </main>
     </div>
+
+    <AppMobileCounterBar />
   </div>
 </template>

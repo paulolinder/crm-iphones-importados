@@ -25,6 +25,10 @@ export interface Order extends BaseEntity {
   
   notes: string | null
   internal_notes: string | null
+
+  /** Caminho no bucket `order_documents` quando o PDF foi salvo no pedido */
+  commercial_document_path: string | null
+  commercial_document_updated_at: string | null
   
   shipped_at: string | null
   delivered_at: string | null

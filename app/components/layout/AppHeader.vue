@@ -98,7 +98,9 @@ async function handleSignOut() {
       <!-- Mobile Menu Button -->
       <button
         v-if="isMobile"
-        class="p-2 -ml-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+        type="button"
+        class="inline-flex min-h-11 min-w-11 items-center justify-center -ml-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors"
+        aria-label="Abrir menu"
         @click="openMobile"
       >
         <Icon name="lucide:menu" class="w-6 h-6" />
@@ -123,7 +125,9 @@ async function handleSignOut() {
       <!-- Mobile Search Button -->
       <button
         v-if="isMobile"
-        class="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors md:hidden"
+        type="button"
+        class="inline-flex min-h-11 min-w-11 items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors md:hidden"
+        aria-label="Buscar"
         @click="showSearch = !showSearch"
       >
         <Icon name="lucide:search" class="w-5 h-5" />

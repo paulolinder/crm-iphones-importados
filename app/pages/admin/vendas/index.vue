@@ -263,41 +263,41 @@ onMounted(async () => {
             <div class="text-right">
               <p class="text-lg font-bold text-slate-900">{{ format(order.total) }}</p>
             </div>
-            <div class="flex items-center gap-1 ml-4">
+            <div class="flex items-center gap-0.5 sm:gap-1 ml-2 sm:ml-4">
               <button
                 v-if="canMarkPaid(order)"
                 type="button"
-                class="relative z-10 p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                class="relative z-10 inline-flex min-h-11 min-w-11 items-center justify-center text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl transition-colors"
                 title="Marcar como pago"
                 @click.stop="openPayModal(order, $event)"
               >
-                <Icon name="lucide:banknote" class="w-4 h-4 pointer-events-none" />
+                <Icon name="lucide:banknote" class="w-5 h-5 pointer-events-none" />
               </button>
               <NuxtLink
                 :to="`/admin/vendas/${order.id}/imprimir?gerar=1`"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                class="inline-flex min-h-11 min-w-11 items-center justify-center text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-colors"
                 title="Gerar impressão (abre impressão ou PDF)"
                 @click.stop
               >
-                <Icon name="lucide:printer" class="w-4 h-4" />
+                <Icon name="lucide:printer" class="w-5 h-5" />
               </NuxtLink>
               <NuxtLink
                 :to="`/admin/vendas/${order.id}`"
-                class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                class="inline-flex min-h-11 min-w-11 items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
                 title="Ver detalhes do pedido"
                 @click.stop
               >
-                <Icon name="lucide:eye" class="w-4 h-4" />
+                <Icon name="lucide:eye" class="w-5 h-5" />
               </NuxtLink>
               <NuxtLink
                 :to="`/admin/vendas/${order.id}/editar`"
-                class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                class="inline-flex min-h-11 min-w-11 items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
                 title="Editar pedido"
                 @click.stop
               >
-                <Icon name="lucide:pencil" class="w-4 h-4" />
+                <Icon name="lucide:pencil" class="w-5 h-5" />
               </NuxtLink>
             </div>
           </div>

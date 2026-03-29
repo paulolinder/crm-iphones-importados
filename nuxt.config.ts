@@ -12,8 +12,11 @@ export default defineNuxtConfig({
       titleTemplate: '%s | Eleve Imports',
       meta: [
         { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
         { name: 'description', content: 'Sistema de Gestão para Loja de iPhones e Produtos Importados' },
+        { name: 'theme-color', content: '#0f172a' },
+        { name: 'apple-mobile-web-app-capable', content: 'yes' },
+        { name: 'mobile-web-app-capable', content: 'yes' },
       ],
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },

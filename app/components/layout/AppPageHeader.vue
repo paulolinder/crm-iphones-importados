@@ -90,7 +90,7 @@ function actionButtonClass(variant?: HeaderAction['variant']) {
           <NuxtLink
             v-if="action.to"
             :to="action.to"
-            :class="actionButtonClass(action.variant)"
+            :class="[actionButtonClass(action.variant), 'min-h-11']"
           >
             <Icon v-if="action.icon" :name="action.icon" class="w-4 h-4" />
             {{ action.label }}
@@ -99,7 +99,7 @@ function actionButtonClass(variant?: HeaderAction['variant']) {
             v-else
             type="button"
             :disabled="action.disabled"
-            :class="actionButtonClass(action.variant)"
+            :class="[actionButtonClass(action.variant), 'min-h-11']"
             @click="runHeaderAction(action)"
           >
             <Icon v-if="action.icon" :name="action.icon" class="w-4 h-4" />
