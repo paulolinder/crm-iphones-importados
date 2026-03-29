@@ -24,6 +24,16 @@ const searchQuery = ref('')
 const userMenuRef = ref<HTMLElement>()
 const notificationsRef = ref<HTMLElement>()
 
+const {
+  items: activityItems,
+  unreadCount,
+  loading: activityLoading,
+  error: activityError,
+  load: loadActivityFeed,
+  markAllRead: markActivityFeedRead,
+  readLastSeenFromStorage,
+} = useAdminActivityFeed()
+
 onClickOutside(userMenuRef, () => {
   showUserMenu.value = false
 })
@@ -39,44 +49,11 @@ const user = reactive({
   avatar: '',
 })
 
-const notifications = ref([
-  {
-    id: '1',
-    type: 'order',
-    title: 'Novo pedido recebido',
-    message: 'Pedido #1234 - iPhone 15 Pro Max',
-    time: '2 min',
-    read: false,
-    icon: 'lucide:shopping-bag',
-    color: 'blue',
-  },
-  {
-    id: '2',
-    type: 'stock',
-    title: 'Alerta de estoque baixo',
-    message: 'AirPods Pro 2 - Apenas 3 unidades',
-    time: '15 min',
-    read: false,
-    icon: 'lucide:alert-triangle',
-    color: 'amber',
-  },
-  {
-    id: '3',
-    type: 'payment',
-    title: 'Pagamento confirmado',
-    message: 'R$ 8.999,00 via PIX',
-    time: '1 hora',
-    read: true,
-    icon: 'lucide:check-circle',
-    color: 'emerald',
-  },
-])
-
-const unreadCount = computed(() => notifications.value.filter(n => !n.read).length)
-
-function markAllNotificationsRead() {
-  for (const n of notifications.value) {
-    n.read = true
+function toggleNotifications() {
+  showNotifications.value = !showNotifications.value
+  if (showNotifications.value) {
+    readLastSeenFromStorage()
+    void loadActivityFeed()
   }
 }
 
@@ -171,8 +148,9 @@ async function handleSignOut() {
       <!-- Notifications -->
       <div ref="notificationsRef" class="relative">
         <button
+          type="button"
           class="relative p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
-          @click="showNotifications = !showNotifications"
+          @click="toggleNotifications"
         >
           <Icon name="lucide:bell" class="w-5 h-5" />
           <span
@@ -197,46 +175,68 @@ async function handleSignOut() {
             class="absolute right-0 mt-1.5 w-80 lg:w-96 bg-white rounded-lg border border-slate-200 overflow-hidden z-50"
           >
             <!-- Header -->
-            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <div>
-                <h3 class="text-sm font-semibold text-slate-900">Notificações</h3>
-                <p class="text-xs text-slate-500 mt-0.5">{{ unreadCount }} não lidas</p>
+            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 gap-2">
+              <div class="min-w-0">
+                <h3 class="text-sm font-semibold text-slate-900">Atividade recente</h3>
+                <p class="text-xs text-slate-500 mt-0.5 truncate">
+                  <template v-if="activityError">Erro ao carregar</template>
+                  <template v-else-if="unreadCount === 0">Fonte: auditoria · nada novo desde a última leitura</template>
+                  <template v-else>Fonte: auditoria · {{ unreadCount }} {{ unreadCount === 1 ? 'não lida' : 'não lidas' }}</template>
+                </p>
               </div>
               <button
+                v-if="!activityError && activityItems.length"
                 type="button"
-                class="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                @click="markAllNotificationsRead"
+                class="text-xs text-primary-600 hover:text-primary-700 font-medium shrink-0"
+                @click="markActivityFeedRead"
               >
-                Marcar todas como lidas
+                Marcar lidas
               </button>
             </div>
 
             <!-- List -->
             <div class="max-h-80 overflow-y-auto">
-              <div
-                v-for="notification in notifications"
-                :key="notification.id"
-                class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-100 last:border-0"
-              >
-                <!-- Icon -->
-                <div class="flex-shrink-0 w-9 h-9 rounded-md bg-slate-100 flex items-center justify-center text-slate-600">
-                  <Icon :name="notification.icon" class="w-[18px] h-[18px]" />
-                </div>
-
-                <!-- Content -->
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-slate-900">{{ notification.title }}</p>
-                  <p class="text-sm text-slate-500 truncate">{{ notification.message }}</p>
-                  <p class="text-xs text-slate-400 mt-1">{{ notification.time }}</p>
-                </div>
+              <div v-if="activityLoading" class="px-4 py-8 text-center text-sm text-slate-500">
+                Carregando…
               </div>
+              <div
+                v-else-if="activityError"
+                class="px-4 py-6 text-sm text-amber-800 bg-amber-50 border-b border-amber-100"
+              >
+                {{ activityError }}. Verifique RLS em <code class="text-xs">audit_logs</code> ou a página
+                <NuxtLink to="/admin/notificacoes" class="underline font-medium" @click="showNotifications = false">Notificações</NuxtLink>.
+              </div>
+              <template v-else>
+                <NuxtLink
+                  v-for="n in activityItems"
+                  :key="n.id"
+                  to="/admin/notificacoes"
+                  class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0"
+                  :class="n.read ? 'opacity-60' : ''"
+                  @click="showNotifications = false"
+                >
+                  <div class="flex-shrink-0 w-9 h-9 rounded-md bg-slate-100 flex items-center justify-center text-slate-600">
+                    <Icon :name="n.icon" class="w-[18px] h-[18px]" />
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-slate-900 leading-snug">{{ n.title }}</p>
+                    <p class="text-xs text-slate-500 mt-0.5">{{ n.subtitle }}</p>
+                  </div>
+                </NuxtLink>
+                <div
+                  v-if="!activityItems.length"
+                  class="px-4 py-10 text-center text-sm text-slate-500"
+                >
+                  Nenhum evento no audit log ainda.
+                </div>
+              </template>
             </div>
 
             <!-- Footer -->
             <div class="px-5 py-2.5 border-t border-slate-100 bg-slate-50">
               <NuxtLink
                 to="/admin/notificacoes"
-                class="block w-full text-sm text-blue-600 hover:text-blue-700 font-medium text-center"
+                class="block w-full text-sm text-primary-600 hover:text-primary-700 font-medium text-center"
                 @click="showNotifications = false"
               >
                 Ver todas as notificações
