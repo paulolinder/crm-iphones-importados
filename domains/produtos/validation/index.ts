@@ -1,5 +1,14 @@
 import { z } from 'zod'
 
+const costBreakdownSchema = z.object({
+  base_cost_brl: z.number().nonnegative().optional().nullable(),
+  import_usd: z.number().nonnegative().optional().nullable(),
+  usd_rate: z.number().nonnegative().optional().nullable(),
+  freight_cost: z.number().nonnegative().optional().nullable(),
+  carrier_cost: z.number().nonnegative().optional().nullable(),
+  nfe_cost: z.number().nonnegative().optional().nullable(),
+}).optional()
+
 export const productFormSchema = z.object({
   name: z.string().trim().min(3, 'Nome é obrigatório'),
   sku: z.string().trim().optional(),
@@ -9,6 +18,7 @@ export const productFormSchema = z.object({
   brand_id: z.string().uuid().optional(),
   price: z.number().nonnegative('Preço de venda deve ser positivo'),
   cost: z.number().nonnegative('Custo deve ser positivo').optional(),
+  cost_breakdown: costBreakdownSchema,
   promotional_price: z.number().nonnegative().optional(),
   min_stock: z.number().int().nonnegative().optional(),
   max_stock: z.number().int().nonnegative().optional(),
@@ -21,7 +31,7 @@ export const productFormSchema = z.object({
     unit: z.enum(['cm', 'mm']),
   }).optional(),
   images: z.array(z.string().url()).optional(),
-  specifications: z.record(z.string()).optional(),
+  specifications: z.record(z.any()).optional(),
   warranty_months: z.number().int().nonnegative().optional(),
   active: z.boolean().optional(),
   featured: z.boolean().optional(),

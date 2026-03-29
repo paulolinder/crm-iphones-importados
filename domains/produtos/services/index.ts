@@ -10,6 +10,12 @@ import type { PaginatedResponse, PaginationParams } from '~/types'
 import type { Tables } from '~/lib/supabase/types'
 import { slugify } from '~/lib/helpers'
 import { assertSupabaseResult, buildPaginatedResponse, normalizeCurrencyValue } from '../../shared/service-utils'
+import {
+  computeTotalCost,
+  hasAnyCostBreakdownInput,
+  mergeSpecificationsWithCostBreakdown,
+  parseCostBreakdownFromSpecs,
+} from '../cost-breakdown'
 import { productFormSchema, productUpdateSchema } from '../validation'
 
 type ProductRow = Tables<'products'>
@@ -84,7 +90,8 @@ function mapProduct(
     weight: product.weight,
     dimensions: (product.dimensions || null) as Product['dimensions'],
     images: (options?.images ?? []).map(image => image.image_url),
-    specifications: (product.specifications || {}) as Record<string, string>,
+    specifications: (product.specifications || {}) as Product['specifications'],
+    cost_breakdown: parseCostBreakdownFromSpecs(product.specifications),
     warranty_months: product.warranty_months,
     active: product.active,
     featured: product.featured,
@@ -221,6 +228,15 @@ export function useProductsService() {
     const payload = productFormSchema.parse(input)
     const slug = slugify(payload.name)
 
+    const mergedSpecs = mergeSpecificationsWithCostBreakdown(
+      (payload.specifications ?? {}) as Record<string, unknown>,
+      payload.cost_breakdown ?? {},
+    )
+
+    const totalCost = hasAnyCostBreakdownInput(payload.cost_breakdown)
+      ? computeTotalCost(payload.cost_breakdown!)
+      : (payload.cost ?? null)
+
     const { data: product, error } = await client
       .from('products')
       .insert({
@@ -233,14 +249,14 @@ export function useProductsService() {
         brand_id: payload.brand_id ?? null,
         status: payload.status ?? (payload.active === false ? 'inactive' : 'active'),
         active: payload.active ?? true,
-        cost_price: payload.cost ?? null,
+        cost_price: totalCost,
         sale_price: payload.price,
         promotional_price: payload.promotional_price ?? null,
         min_stock: payload.min_stock ?? 0,
         max_stock: payload.max_stock ?? null,
         weight: payload.weight ?? null,
         dimensions: payload.dimensions ?? {},
-        specifications: payload.specifications ?? {},
+        specifications: mergedSpecs,
         warranty_months: payload.warranty_months ?? null,
         is_trackable: payload.is_trackable ?? false,
         featured: payload.featured ?? false,
@@ -260,7 +276,7 @@ export function useProductsService() {
         reserved_quantity: 0,
         min_stock: payload.min_stock ?? 0,
         max_stock: payload.max_stock ?? null,
-        average_cost: payload.cost ?? null,
+        average_cost: totalCost,
       })
 
     assertSupabaseResult(inventoryError, 'Produto criado, mas o item de estoque não foi inicializado')
@@ -284,6 +300,28 @@ export function useProductsService() {
   const update = async (id: string, input: Partial<ProductFormData>) => {
     const payload = productUpdateSchema.parse(input)
 
+    let specificationsPatch: Record<string, unknown> | undefined
+    let resolvedCost: number | null | undefined = payload.cost
+
+    if (payload.cost_breakdown !== undefined) {
+      const { data: existingRow } = await client
+        .from('products')
+        .select('specifications')
+        .eq('id', id)
+        .maybeSingle()
+
+      specificationsPatch = mergeSpecificationsWithCostBreakdown(
+        existingRow?.specifications as Record<string, unknown> | undefined,
+        payload.cost_breakdown,
+      )
+      resolvedCost = hasAnyCostBreakdownInput(payload.cost_breakdown)
+        ? computeTotalCost(payload.cost_breakdown)
+        : payload.cost
+    }
+    else if (payload.specifications !== undefined) {
+      specificationsPatch = payload.specifications as Record<string, unknown>
+    }
+
     const { data: product, error } = await client
       .from('products')
       .update({
@@ -296,14 +334,14 @@ export function useProductsService() {
         brand_id: payload.brand_id,
         status: payload.status,
         active: payload.active,
-        cost_price: payload.cost,
+        cost_price: resolvedCost,
         sale_price: payload.price,
         promotional_price: payload.promotional_price,
         min_stock: payload.min_stock,
         max_stock: payload.max_stock,
         weight: payload.weight,
         dimensions: payload.dimensions,
-        specifications: payload.specifications,
+        specifications: specificationsPatch ?? payload.specifications,
         warranty_months: payload.warranty_months,
         is_trackable: payload.is_trackable,
         featured: payload.featured,
@@ -318,6 +356,7 @@ export function useProductsService() {
       typeof payload.min_stock === 'number'
       || typeof payload.max_stock === 'number'
       || typeof payload.cost === 'number'
+      || typeof resolvedCost === 'number'
       || typeof payload.stock_quantity === 'number'
     ) {
       const inventoryPatch: Record<string, unknown> = {}
@@ -327,7 +366,10 @@ export function useProductsService() {
       if (typeof payload.max_stock === 'number') {
         inventoryPatch.max_stock = payload.max_stock
       }
-      if (typeof payload.cost === 'number') {
+      if (typeof resolvedCost === 'number') {
+        inventoryPatch.average_cost = resolvedCost
+      }
+      else if (typeof payload.cost === 'number') {
         inventoryPatch.average_cost = payload.cost
       }
       if (typeof payload.stock_quantity === 'number') {

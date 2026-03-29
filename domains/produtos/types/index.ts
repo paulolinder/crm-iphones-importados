@@ -5,6 +5,7 @@
  */
 
 import type { BaseEntity } from '~/types'
+import type { ProductCostBreakdownInput } from '../cost-breakdown'
 
 export interface Product extends BaseEntity {
   name: string
@@ -22,7 +23,9 @@ export interface Product extends BaseEntity {
   weight: number | null
   dimensions: ProductDimensions | null
   images: string[]
-  specifications: Record<string, string>
+  specifications: Record<string, string | number | boolean | object | null>
+  /** Derivado de specifications.cost_breakdown quando existir */
+  cost_breakdown?: ProductCostBreakdownInput | null
   warranty_months: number | null
   active: boolean
   featured: boolean
@@ -67,7 +70,10 @@ export interface ProductFormData {
   category_id?: string
   brand_id?: string
   price: number
+  /** Custo total; se cost_breakdown existir, o serviço recalcula a partir dele */
   cost?: number
+  /** Opcional: frete, freteiro, NF-e, USD × cotação, custo base R$ */
+  cost_breakdown?: ProductCostBreakdownInput
   promotional_price?: number
   min_stock?: number
   max_stock?: number
@@ -76,7 +82,7 @@ export interface ProductFormData {
   weight?: number
   dimensions?: ProductDimensions
   images?: string[]
-  specifications?: Record<string, string>
+  specifications?: Record<string, unknown>
   warranty_months?: number
   active?: boolean
   featured?: boolean

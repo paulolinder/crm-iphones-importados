@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import type { ProductCostBreakdownInput } from '~~/domains/produtos/cost-breakdown'
+import { computeTotalCost } from '~~/domains/produtos/cost-breakdown'
+
 definePageMeta({
   layout: 'admin',
 })
@@ -12,13 +15,14 @@ const service = useProductsService()
 const categories = ref<{ id: string, name: string }[]>([])
 const brands = ref<{ id: string, name: string }[]>([])
 
+const costBreakdown = ref<ProductCostBreakdownInput>({})
+
 const form = reactive({
   name: '',
   sku: '',
   category_id: '',
   brand_id: '',
   price: 0,
-  cost: 0,
   stock_quantity: 0,
   min_stock: 0,
   max_stock: 0,
@@ -51,13 +55,15 @@ const handleSubmit = async () => {
   saving.value = true
 
   try {
+    const totalCost = computeTotalCost(costBreakdown.value)
     await service.create({
       name: form.name,
       sku: form.sku,
       category_id: form.category_id || undefined,
       brand_id: form.brand_id || undefined,
       price: form.price,
-      cost: form.cost || undefined,
+      cost: totalCost,
+      cost_breakdown: { ...costBreakdown.value },
       stock_quantity: form.stock_quantity,
       min_stock: form.min_stock,
       max_stock: form.max_stock || undefined,
@@ -133,10 +139,7 @@ const handleSubmit = async () => {
             <input v-model.number="form.price" type="number" min="0" step="0.01" class="form-input" />
           </div>
 
-          <div>
-            <label class="form-label">Custo</label>
-            <input v-model.number="form.cost" type="number" min="0" step="0.01" class="form-input" />
-          </div>
+          <ProductCostSection v-model="costBreakdown" :price="form.price" />
 
           <div>
             <label class="form-label">Quantidade em estoque</label>
