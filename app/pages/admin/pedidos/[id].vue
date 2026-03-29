@@ -177,9 +177,30 @@ const confirmPay = async () => {
 const showPaymentPending = computed(() => order.value?.payment_status === 'pending')
 const canCancel = computed(() => order.value && !['cancelled', 'delivered', 'returned'].includes(order.value.status))
 
+function openPrintPedido() {
+  if (!order.value || typeof window === 'undefined') {
+    return
+  }
+  window.open(`/admin/vendas/${order.value.id}/imprimir`, '_blank', 'noopener,noreferrer')
+}
+
 const headerActions = computed(() => {
-  const actions: { key: string; label: string; icon?: string; variant?: 'primary' | 'outline'; to?: string }[] = []
+  const actions: {
+    key: string
+    label: string
+    icon?: string
+    variant?: 'primary' | 'outline'
+    to?: string
+    onClick?: () => void
+  }[] = []
   if (order.value) {
+    actions.push({
+      key: 'print',
+      label: 'Gerar impressão',
+      icon: 'lucide:printer',
+      variant: 'outline',
+      onClick: openPrintPedido,
+    })
     actions.push({
       key: 'edit',
       label: 'Editar',

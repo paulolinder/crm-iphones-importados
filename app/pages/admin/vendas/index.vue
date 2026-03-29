@@ -274,6 +274,16 @@ onMounted(async () => {
                 <Icon name="lucide:banknote" class="w-4 h-4 pointer-events-none" />
               </button>
               <NuxtLink
+                :to="`/admin/vendas/${order.id}/imprimir?gerar=1`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                title="Gerar impressão (abre impressão ou PDF)"
+                @click.stop
+              >
+                <Icon name="lucide:printer" class="w-4 h-4" />
+              </NuxtLink>
+              <NuxtLink
                 :to="`/admin/vendas/${order.id}`"
                 class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
                 title="Ver detalhes do pedido"

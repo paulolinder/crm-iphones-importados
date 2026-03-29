@@ -42,6 +42,31 @@ watch(orderId, () => {
 useHead({
   title: computed(() => order.value?.number ? `Pedido ${order.value.number}` : 'Pedido'),
 })
+
+function openPrintPedido() {
+  if (!orderId.value || typeof window === 'undefined') {
+    return
+  }
+  window.open(`/admin/vendas/${orderId.value}/imprimir`, '_blank', 'noopener,noreferrer')
+}
+
+const detailActions = computed(() => [
+  {
+    key: 'edit',
+    label: 'Editar',
+    icon: 'lucide:pencil',
+    variant: 'primary' as const,
+    to: `/admin/vendas/${orderId.value}/editar`,
+  },
+  {
+    key: 'print',
+    label: 'Gerar impressão',
+    icon: 'lucide:printer',
+    variant: 'outline' as const,
+    onClick: openPrintPedido,
+  },
+  { key: 'list', label: 'Voltar', variant: 'outline' as const, to: '/admin/vendas' },
+])
 </script>
 
 <template>
@@ -53,10 +78,7 @@ useHead({
         { label: 'Vendas', to: '/admin/vendas' },
         { label: order?.number || 'Detalhes' },
       ]"
-      :actions="[
-        { key: 'edit', label: 'Editar', icon: 'lucide:pencil', variant: 'primary', to: `/admin/vendas/${orderId}/editar` },
-        { key: 'list', label: 'Voltar', variant: 'outline', to: '/admin/vendas' },
-      ]"
+      :actions="detailActions"
     />
 
     <div v-if="loading" class="text-center py-12 text-slate-500 text-sm">
