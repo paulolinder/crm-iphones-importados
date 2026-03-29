@@ -81,7 +81,7 @@ const sizeClasses = {
     >
       <div
         v-if="isOpen"
-        class="modal-backdrop"
+        class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
         @click.self="handleBackdropClick"
       >
         <Transition
@@ -94,18 +94,27 @@ const sizeClasses = {
         >
           <div
             v-if="isOpen"
-            class="modal"
+            class="relative w-full max-h-[min(90vh,800px)] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl border border-slate-200"
             :class="sizeClasses[size]"
+            role="dialog"
+            aria-modal="true"
+            @click.stop
           >
             <!-- Header -->
-            <div v-if="title || closable || $slots.header" class="modal-header">
+            <div
+              v-if="title || closable || $slots.header"
+              class="flex items-start justify-between gap-3 px-5 py-4 border-b border-slate-100 shrink-0"
+            >
               <slot name="header">
-                <h3 class="modal-title">{{ title }}</h3>
+                <h3 class="text-lg font-semibold text-slate-900 pr-2">
+                  {{ title }}
+                </h3>
               </slot>
               <button
                 v-if="closable"
                 type="button"
-                class="p-1 text-slate-400 hover:text-slate-600 rounded transition-colors"
+                class="p-1 text-slate-400 hover:text-slate-600 rounded transition-colors shrink-0"
+                aria-label="Fechar"
                 @click="close"
               >
                 <Icon name="lucide:x" class="w-5 h-5" />
@@ -113,12 +122,12 @@ const sizeClasses = {
             </div>
 
             <!-- Body -->
-            <div class="modal-body">
+            <div class="px-5 py-4 overflow-y-auto min-h-0">
               <slot />
             </div>
 
             <!-- Footer -->
-            <div v-if="$slots.footer" class="modal-footer">
+            <div v-if="$slots.footer" class="px-5 py-4 border-t border-slate-100 shrink-0">
               <slot name="footer" />
             </div>
           </div>

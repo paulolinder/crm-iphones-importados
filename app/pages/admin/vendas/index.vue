@@ -267,11 +267,11 @@ onMounted(async () => {
               <button
                 v-if="canMarkPaid(order)"
                 type="button"
-                class="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                class="relative z-10 p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
                 title="Marcar como pago"
-                @click="openPayModal(order, $event)"
+                @click.stop="openPayModal(order, $event)"
               >
-                <Icon name="lucide:banknote" class="w-4 h-4" />
+                <Icon name="lucide:banknote" class="w-4 h-4 pointer-events-none" />
               </button>
               <NuxtLink
                 :to="`/admin/vendas/${order.id}`"
