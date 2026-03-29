@@ -13,6 +13,9 @@ const { formatDateTime } = useDateFormat()
 const { success, error: showError } = useToast()
 const service = useOrdersService()
 
+/** Rotas estáticas /pedidos/novo e /pedidos/nova não devem cair aqui como UUID */
+const NEW_ORDER_SLUGS = new Set(['novo', 'nova'])
+
 const orderId = computed(() => {
   const raw = route.params.id as string | string[] | undefined
   return Array.isArray(raw) ? raw[0] ?? '' : String(raw ?? '')
@@ -31,6 +34,12 @@ const cancelReason = ref('')
 
 const load = async () => {
   if (!orderId.value) {
+    return
+  }
+
+  if (NEW_ORDER_SLUGS.has(orderId.value.toLowerCase())) {
+    loading.value = false
+    await navigateTo('/admin/pedidos/novo', { replace: true })
     return
   }
 
