@@ -156,6 +156,49 @@ export function useFinanceService() {
     return mapReceivable(data)
   }
 
+  const listReceivables = async (params: PaginationParams = {}): Promise<PaginatedResponse<AccountsReceivable>> => {
+    const page = params.page ?? 1
+    const perPage = params.per_page ?? 20
+    const from = (page - 1) * perPage
+    const to = from + perPage - 1
+
+    const { data, error, count } = await client
+      .from('accounts_receivable')
+      .select('*', { count: 'exact' })
+      .order('due_date', { ascending: true })
+      .range(from, to)
+
+    assertSupabaseResult(error, 'Não foi possível carregar contas a receber')
+    return buildPaginatedResponse((data ?? []).map(mapReceivable), count ?? 0, params)
+  }
+
+  const listPayables = async (params: PaginationParams = {}): Promise<PaginatedResponse<AccountsPayable>> => {
+    const page = params.page ?? 1
+    const perPage = params.per_page ?? 20
+    const from = (page - 1) * perPage
+    const to = from + perPage - 1
+
+    const { data, error, count } = await client
+      .from('accounts_payable')
+      .select('*', { count: 'exact' })
+      .order('due_date', { ascending: true })
+      .range(from, to)
+
+    assertSupabaseResult(error, 'Não foi possível carregar contas a pagar')
+    return buildPaginatedResponse((data ?? []).map(mapPayable), count ?? 0, params)
+  }
+
+  const listCashAccounts = async () => {
+    const { data, error } = await client
+      .from('cash_accounts')
+      .select('*')
+      .eq('active', true)
+      .order('name')
+
+    assertSupabaseResult(error, 'Não foi possível carregar as contas de caixa')
+    return data ?? []
+  }
+
   const getSummary = async (): Promise<FinanceSummary> => {
     const [{ data: transactions, error: transactionsError }, { data: receivables, error: receivablesError }, { data: payables, error: payablesError }] = await Promise.all([
       client.from('financial_transactions').select('transaction_type, amount, occurred_at'),
@@ -199,6 +242,9 @@ export function useFinanceService() {
 
   return {
     listTransactions,
+    listReceivables,
+    listPayables,
+    listCashAccounts,
     registerTransaction,
     registerPayable,
     registerReceivable,

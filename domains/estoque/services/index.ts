@@ -2,7 +2,7 @@ import type { ProductStock, StockEntryFormData, StockExitFormData, StockFilters,
 import type { PaginatedResponse, PaginationParams } from '~/types'
 import type { Tables } from '~/lib/supabase/types'
 import { assertSupabaseResult, buildPaginatedResponse, normalizeCurrencyValue } from '../../shared/service-utils'
-import { stockEntrySchema, stockExitSchema } from '../validation'
+import { stockAdjustmentSchema, stockEntrySchema, stockExitSchema } from '../validation'
 
 type InventoryItemRow = Tables<'inventory_items'>
 type InventoryMovementRow = Tables<'inventory_movements'>
@@ -369,6 +369,81 @@ export function useInventoryService() {
     return { movement, inventory: updatedInventory }
   }
 
+  const registerAdjustment = async (input: { product_id: string; delta: number; notes?: string }) => {
+    const payload = stockAdjustmentSchema.parse(input)
+    const inventoryItem = await ensureInventoryItem(payload.product_id)
+    const nextQuantity = inventoryItem.quantity + payload.delta
+
+    if (nextQuantity < 0) {
+      throw new Error('Saldo não pode ficar negativo com este ajuste')
+    }
+
+    const { data: updatedInventory, error: inventoryError } = await client
+      .from('inventory_items')
+      .update({
+        quantity: nextQuantity,
+        last_movement_at: new Date().toISOString(),
+      })
+      .eq('id', inventoryItem.id)
+      .select('*')
+      .single()
+
+    assertSupabaseResult(inventoryError, 'Não foi possível atualizar o saldo')
+
+    const { error: movementError } = await client
+      .from('inventory_movements')
+      .insert({
+        inventory_item_id: inventoryItem.id,
+        product_id: payload.product_id,
+        movement_type: 'adjustment',
+        quantity: Math.abs(payload.delta),
+        previous_quantity: inventoryItem.quantity,
+        new_quantity: nextQuantity,
+        reference_type: 'adjustment',
+        reference_id: null,
+        notes: payload.notes ?? null,
+        performed_by: user.value?.id ?? null,
+      })
+
+    assertSupabaseResult(movementError, 'Não foi possível registrar o ajuste de estoque')
+
+    return updatedInventory
+  }
+
+  const listPurchaseEntries = async (params: PaginationParams = {}) => {
+    const page = params.page ?? 1
+    const perPage = params.per_page ?? 20
+    const from = (page - 1) * perPage
+    const to = from + perPage - 1
+
+    const { data, error, count } = await client
+      .from('purchase_entries')
+      .select(`
+        *,
+        suppliers ( id, name )
+      `, { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(from, to)
+
+    assertSupabaseResult(error, 'Não foi possível carregar as entradas de compra')
+
+    type PeRow = Tables<'purchase_entries'> & { suppliers?: { id: string; name: string } | null }
+    const rows = (data ?? []).map((row: PeRow) => ({
+      id: row.id,
+      entry_number: row.entry_number,
+      entry_date: row.entry_date,
+      invoice_number: row.invoice_number,
+      status: row.status,
+      total_cost: row.total_cost,
+      notes: row.notes,
+      created_at: row.created_at,
+      supplier_id: row.supplier_id,
+      supplier_name: row.suppliers?.name ?? null,
+    }))
+
+    return buildPaginatedResponse(rows, count ?? 0, params)
+  }
+
   const getStats = async (): Promise<StockStats> => {
     const { data: inventoryItems, error } = await client
       .from('inventory_items')
@@ -392,6 +467,8 @@ export function useInventoryService() {
     listMovements,
     registerEntry,
     registerMovement,
+    registerAdjustment,
+    listPurchaseEntries,
     getStats,
   }
 }

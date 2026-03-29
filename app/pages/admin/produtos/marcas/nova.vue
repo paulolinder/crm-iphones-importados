@@ -2,7 +2,36 @@
 definePageMeta({ layout: 'admin' })
 useHead({ title: 'Nova marca' })
 
-const notifyFormPlaceholder = usePlaceholderSubmit()
+const products = useProductsService()
+const { success, error: toastError } = useToast()
+
+const form = reactive({
+  name: '',
+  description: '',
+})
+const saving = ref(false)
+
+const submit = async () => {
+  if (!form.name.trim()) {
+    toastError('Validação', 'Informe o nome da marca.')
+    return
+  }
+  saving.value = true
+  try {
+    await products.createBrand({
+      name: form.name.trim(),
+      description: form.description.trim() || null,
+    })
+    success('Marca criada', '')
+    await navigateTo('/admin/produtos/marcas')
+  }
+  catch (e) {
+    toastError('Erro', e instanceof Error ? e.message : 'Não foi possível salvar')
+  }
+  finally {
+    saving.value = false
+  }
+}
 </script>
 
 <template>
@@ -18,20 +47,20 @@ const notifyFormPlaceholder = usePlaceholderSubmit()
         { key: 'cancel', label: 'Cancelar', variant: 'outline', to: '/admin/produtos/marcas' },
       ]"
     />
-    <AdminPlaceholderNotice />
-    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-6">
-      <AdminFormGrid>
-        <AdminFieldStub label="Nome" hint="Apple" />
-        <AdminFieldStub label="Slug" hint="apple" />
-        <AdminFieldStub label="URL do logo" hint="https://..." />
-        <AdminFieldStub label="Descrição" />
-      </AdminFormGrid>
-      <button
-        type="button"
-        class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/25"
-        @click="notifyFormPlaceholder"
-      >
-        Salvar (placeholder)
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-6 max-w-xl">
+      <div>
+        <label class="form-label">Nome *</label>
+        <input v-model="form.name" type="text" class="form-input" placeholder="Ex.: Apple">
+      </div>
+      <div>
+        <label class="form-label">Descrição</label>
+        <textarea v-model="form.description" rows="3" class="form-input" />
+      </div>
+      <p class="text-xs text-slate-500">
+        O slug é gerado automaticamente a partir do nome.
+      </p>
+      <button type="button" class="btn-primary" :disabled="saving" @click="submit">
+        {{ saving ? 'Salvando…' : 'Salvar marca' }}
       </button>
     </div>
   </div>

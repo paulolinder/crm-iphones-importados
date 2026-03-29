@@ -47,6 +47,9 @@ export function useFinance() {
     loadTransactions,
     createTransaction,
     getSummary: service.getSummary,
+    listReceivables: service.listReceivables,
+    listPayables: service.listPayables,
+    listCashAccounts: service.listCashAccounts,
     registerPayable: service.registerPayable,
     registerReceivable: service.registerReceivable,
   }

@@ -474,6 +474,91 @@ export function useProductsService() {
     return (data ?? []).map(category => mapCategory(category)!).filter(Boolean)
   }
 
+  const getBrandById = async (id: string) => {
+    const { data, error } = await client.from('brands').select('*').eq('id', id).maybeSingle()
+    assertSupabaseResult(error, 'Não foi possível carregar a marca')
+    return data ? mapBrand(data) : undefined
+  }
+
+  const updateBrand = async (id: string, input: { name?: string; description?: string | null; active?: boolean }) => {
+    const { data, error } = await client
+      .from('brands')
+      .update({
+        ...input,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .select('*')
+      .single()
+
+    assertSupabaseResult(error, 'Não foi possível atualizar a marca')
+    return mapBrand(data)!
+  }
+
+  const getCategoryById = async (id: string) => {
+    const { data, error } = await client.from('categories').select('*').eq('id', id).maybeSingle()
+    assertSupabaseResult(error, 'Não foi possível carregar a categoria')
+    return data ? mapCategory(data) : undefined
+  }
+
+  const createCategory = async (input: { name: string; description?: string | null; parent_id?: string | null }) => {
+    const name = input.name.trim()
+    if (!name) {
+      throw new Error('Informe o nome da categoria.')
+    }
+
+    const baseSlug = slugify(name) || `categoria-${Date.now().toString(36)}`
+
+    for (let i = 0; i < 24; i++) {
+      const slug = i === 0 ? baseSlug : `${baseSlug}-${i}`
+      const { data, error } = await client
+        .from('categories')
+        .insert({
+          name,
+          slug,
+          description: input.description?.trim() || null,
+          parent_id: input.parent_id ?? null,
+          active: true,
+          sort_order: 0,
+        })
+        .select('*')
+        .single()
+
+      if (!error && data) {
+        return mapCategory(data)!
+      }
+
+      if (error?.code === '23505') {
+        continue
+      }
+
+      assertSupabaseResult(error, 'Não foi possível criar a categoria')
+    }
+
+    throw new Error('Não foi possível gerar um identificador único (slug) para a categoria.')
+  }
+
+  const updateCategory = async (id: string, input: {
+    name?: string
+    description?: string | null
+    parent_id?: string | null
+    sort_order?: number
+    active?: boolean
+  }) => {
+    const { data, error } = await client
+      .from('categories')
+      .update({
+        ...input,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .select('*')
+      .single()
+
+    assertSupabaseResult(error, 'Não foi possível atualizar a categoria')
+    return mapCategory(data)!
+  }
+
   return {
     list,
     getById,
@@ -483,6 +568,11 @@ export function useProductsService() {
     getStats,
     listBrands,
     createBrand,
+    getBrandById,
+    updateBrand,
     listCategories,
+    getCategoryById,
+    createCategory,
+    updateCategory,
   }
 }

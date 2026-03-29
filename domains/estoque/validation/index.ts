@@ -19,5 +19,12 @@ export const stockExitSchema = z.object({
   notes: z.string().trim().optional(),
 })
 
+export const stockAdjustmentSchema = z.object({
+  product_id: z.string().uuid(),
+  delta: z.number().int().refine(v => v !== 0, 'Informe uma variação diferente de zero'),
+  notes: z.string().trim().optional(),
+})
+
 export type StockEntrySchema = z.infer<typeof stockEntrySchema>
 export type StockExitSchema = z.infer<typeof stockExitSchema>
+export type StockAdjustmentSchema = z.infer<typeof stockAdjustmentSchema>
