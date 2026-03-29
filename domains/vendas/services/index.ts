@@ -281,6 +281,21 @@ export function useOrdersService() {
 
     assertSupabaseResult(statusHistoryError, 'Pedido criado, mas o histórico de status não foi salvo')
 
+    const { error: receivableError } = await client
+      .from('accounts_receivable')
+      .insert({
+        customer_id: payload.customer_id,
+        order_id: order.id,
+        description: `Pedido ${order.order_number}`,
+        amount: totalAmount,
+        due_date: new Date().toISOString().slice(0, 10),
+        status: 'pending',
+      })
+
+    if (receivableError) {
+      console.warn('[orders] Conta a receber não registrada (permissão financeiro ou RLS):', receivableError.message)
+    }
+
     if (payload.payment_method) {
       const { error: paymentError } = await client
         .from('order_payments')
@@ -401,6 +416,18 @@ export function useOrdersService() {
       throw new Error('Método de pagamento é obrigatório')
     }
 
+    const { data: orderRow, error: orderFetchError } = await client
+      .from('orders')
+      .select('id, order_number, payment_status')
+      .eq('id', orderId)
+      .single()
+
+    assertSupabaseResult(orderFetchError, 'Não foi possível carregar o pedido')
+
+    if (orderRow.payment_status === 'paid') {
+      throw new Error('Este pedido já está marcado como pago')
+    }
+
     const { data, error } = await client
       .from('order_payments')
       .insert({
@@ -424,6 +451,42 @@ export function useOrdersService() {
       .eq('id', orderId)
 
     assertSupabaseResult(orderError, 'Pagamento registrado, mas o status do pedido não foi atualizado')
+
+    const occurredAt = new Date().toISOString()
+
+    const { data: receivable } = await client
+      .from('accounts_receivable')
+      .select('id')
+      .eq('order_id', orderId)
+      .in('status', ['pending', 'partial'])
+      .maybeSingle()
+
+    const { error: txError } = await client
+      .from('financial_transactions')
+      .insert({
+        transaction_type: 'income',
+        description: `Recebimento ${orderRow.order_number}`,
+        amount,
+        occurred_at: occurredAt,
+        category: 'vendas',
+        order_id: orderId,
+        accounts_receivable_id: receivable?.id ?? null,
+        created_by: user.value?.id ?? null,
+      })
+
+    assertSupabaseResult(txError, 'Pagamento salvo, mas o lançamento no financeiro falhou')
+
+    if (receivable?.id) {
+      const { error: recvErr } = await client
+        .from('accounts_receivable')
+        .update({
+          status: 'paid',
+          received_at: occurredAt,
+        })
+        .eq('id', receivable.id)
+
+      assertSupabaseResult(recvErr, 'Pagamento salvo, mas a baixa em contas a receber falhou')
+    }
 
     return data
   }

@@ -49,7 +49,7 @@ onMounted(async () => {
     <!-- Header -->
     <AppPageHeader
       title="Financeiro"
-      description="Controle financeiro e fluxo de caixa"
+      description="Saldo e lucro do mês vêm dos lançamentos (entradas/saídas). Ao marcar uma venda como paga, a receita entra aqui. Saídas de estoque ficam em Estoque."
       :breadcrumbs="[{ label: 'Financeiro' }]"
       :actions="[
         { key: 'export', label: 'Exportar', icon: 'lucide:download', variant: 'outline', to: '/admin/financeiro/exportar' },
@@ -97,7 +97,9 @@ onMounted(async () => {
           <span class="text-sm font-medium text-slate-500">A Receber</span>
         </div>
         <p class="text-2xl font-bold text-slate-900">{{ format(stats.receivables) }}</p>
-        <p class="text-xs text-emerald-600 mt-1">+12 parcelas pendentes</p>
+        <p class="text-xs text-slate-500 mt-1">
+          Soma de contas a receber ainda pendentes (inclui pedidos não pagos, quando geradas)
+        </p>
       </div>
 
       <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
@@ -108,7 +110,9 @@ onMounted(async () => {
           <span class="text-sm font-medium text-slate-500">A Pagar</span>
         </div>
         <p class="text-2xl font-bold text-slate-900">{{ format(stats.payables) }}</p>
-        <p class="text-xs text-red-600 mt-1">5 contas próximas</p>
+        <p class="text-xs text-slate-500 mt-1">
+          Contas a pagar pendentes ou parciais
+        </p>
       </div>
 
       <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
@@ -119,7 +123,9 @@ onMounted(async () => {
           <span class="text-sm font-medium text-slate-500">Lucro do Mês</span>
         </div>
         <p class="text-2xl font-bold text-slate-900">{{ format(stats.monthlyProfit) }}</p>
-        <p class="text-xs text-emerald-600 mt-1">+18% vs mês anterior</p>
+        <p class="text-xs text-slate-500 mt-1">
+          Receitas − despesas dos lançamentos deste mês
+        </p>
       </div>
     </div>
 

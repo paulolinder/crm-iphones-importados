@@ -3,6 +3,9 @@
  * Vendas - Lista de vendas/pedidos com design premium
  */
 
+import type { Order } from '~~/domains/vendas/types'
+import type { PaymentMethod } from '~/types'
+
 definePageMeta({
   layout: 'admin',
 })
@@ -13,11 +16,53 @@ useHead({
 
 const { format } = useCurrency()
 const { formatRelative } = useDateFormat()
+const { success, error: showError } = useToast()
 
 const searchQuery = ref('')
 const selectedStatus = ref('')
 const { orders, loading, error, pagination, updateFilters, loadOrders } = useOrders()
 const ordersService = useOrdersService()
+
+const payModalOpen = ref(false)
+const payOrder = ref<Order | null>(null)
+const payAmount = ref(0)
+const payMethod = ref<PaymentMethod>('pix')
+const markingPaid = ref(false)
+
+const canMarkPaid = (order: Order) =>
+  order.payment_status === 'pending' || order.payment_status === 'partial'
+
+const openPayModal = (order: Order, e: Event) => {
+  e.stopPropagation()
+  e.preventDefault()
+  payOrder.value = order
+  payAmount.value = order.total
+  payMethod.value = (order.payment_method ?? 'pix') as PaymentMethod
+  payModalOpen.value = true
+}
+
+const confirmMarkPaid = async () => {
+  if (!payOrder.value) {
+    return
+  }
+
+  markingPaid.value = true
+
+  try {
+    await ordersService.registerPayment(payOrder.value.id, payAmount.value, payMethod.value)
+    success('Pagamento registrado', 'Pedido marcado como pago. Entrada registrada no financeiro.')
+    payModalOpen.value = false
+    payOrder.value = null
+    await loadOrders()
+    await refreshStats()
+  }
+  catch (err) {
+    showError('Erro ao registrar pagamento', err instanceof Error ? err.message : 'Tente novamente.')
+  }
+  finally {
+    markingPaid.value = false
+  }
+}
 const stats = ref({
   today: format(0),
   pending: 0,
@@ -45,6 +90,7 @@ const statusConfig: Record<string, { label: string; bg: string; text: string; ic
 
 const paymentStatusConfig: Record<string, { label: string; color: string }> = {
   pending: { label: 'Aguardando', color: 'text-amber-600' },
+  partial: { label: 'Parcial', color: 'text-blue-600' },
   paid: { label: 'Pago', color: 'text-emerald-600' },
   refunded: { label: 'Reembolsado', color: 'text-slate-500' },
 }
@@ -218,10 +264,20 @@ onMounted(async () => {
               <p class="text-lg font-bold text-slate-900">{{ format(order.total) }}</p>
             </div>
             <div class="flex items-center gap-1 ml-4">
+              <button
+                v-if="canMarkPaid(order)"
+                type="button"
+                class="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                title="Marcar como pago"
+                @click="openPayModal(order, $event)"
+              >
+                <Icon name="lucide:banknote" class="w-4 h-4" />
+              </button>
               <NuxtLink
                 :to="`/admin/vendas/${order.id}`"
                 class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
                 title="Ver detalhes do pedido"
+                @click.stop
               >
                 <Icon name="lucide:eye" class="w-4 h-4" />
               </NuxtLink>
@@ -229,6 +285,7 @@ onMounted(async () => {
                 :to="`/admin/vendas/${order.id}/editar`"
                 class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
                 title="Editar pedido"
+                @click.stop
               >
                 <Icon name="lucide:pencil" class="w-4 h-4" />
               </NuxtLink>
@@ -248,5 +305,50 @@ onMounted(async () => {
         <p class="text-sm text-slate-500">{{ error?.message || 'Tente ajustar os filtros de busca' }}</p>
       </div>
     </div>
+
+    <BaseModal v-model="payModalOpen" title="Marcar como pago" size="md">
+      <div v-if="payOrder" class="space-y-4">
+        <p class="text-sm text-slate-600">
+          Confirme o valor e o método. O pedido será marcado como pago e uma <strong class="font-medium text-slate-800">entrada (receita)</strong> será lançada no financeiro.
+        </p>
+        <div>
+          <label class="form-label">Valor</label>
+          <input v-model.number="payAmount" type="number" min="0" step="0.01" class="form-input">
+        </div>
+        <div>
+          <label class="form-label">Método</label>
+          <select v-model="payMethod" class="form-input">
+            <option value="pix">
+              PIX
+            </option>
+            <option value="cash">
+              Dinheiro
+            </option>
+            <option value="credit_card">
+              Cartão de crédito
+            </option>
+            <option value="debit_card">
+              Cartão de débito
+            </option>
+            <option value="transfer">
+              Transferência
+            </option>
+          </select>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" class="btn-outline" @click="payModalOpen = false">
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn-primary"
+            :disabled="markingPaid || payAmount <= 0"
+            @click="confirmMarkPaid"
+          >
+            {{ markingPaid ? 'Salvando…' : 'Confirmar pagamento' }}
+          </button>
+        </div>
+      </div>
+    </BaseModal>
   </div>
 </template>
