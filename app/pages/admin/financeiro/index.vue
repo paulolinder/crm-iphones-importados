@@ -69,7 +69,7 @@ onMounted(async () => {
         ]"
         :key="item.to"
         :to="item.to"
-        class="flex items-center gap-2 px-4 py-3 rounded-xl bg-white border border-slate-100 shadow-sm text-sm font-medium text-slate-700 hover:border-blue-200 hover:text-blue-700 transition-colors"
+        class="flex items-center gap-2 px-4 py-3 rounded-lg bg-white border border-slate-200/70 shadow-sm text-sm font-medium text-slate-700 hover:border-primary-200 hover:text-primary-700 transition-colors"
       >
         <Icon :name="item.icon" class="w-4 h-4 text-slate-400" />
         {{ item.label }}
@@ -79,50 +79,50 @@ onMounted(async () => {
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
       <!-- Balance Card -->
-      <div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-5 shadow-lg shadow-blue-500/20 text-white">
+      <div class="bg-primary-600 rounded-lg p-5 text-white">
         <div class="flex items-center gap-3 mb-3">
-          <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+          <div class="w-10 h-10 rounded-md bg-white/15 flex items-center justify-center">
             <Icon name="lucide:wallet" class="w-5 h-5" />
           </div>
           <span class="text-sm font-medium text-blue-100">Saldo Atual</span>
         </div>
-        <p class="text-3xl font-bold">{{ format(stats.balance) }}</p>
+        <p class="text-3xl font-semibold tabular-nums">{{ format(stats.balance) }}</p>
       </div>
 
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3 mb-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-            <Icon name="lucide:arrow-down-circle" class="w-5 h-5 text-emerald-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:arrow-down-circle" class="w-5 h-5 text-slate-600" />
           </div>
           <span class="text-sm font-medium text-slate-500">A Receber</span>
         </div>
-        <p class="text-2xl font-bold text-slate-900">{{ format(stats.receivables) }}</p>
+        <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ format(stats.receivables) }}</p>
         <p class="text-xs text-slate-500 mt-1">
           Soma de contas a receber ainda pendentes (inclui pedidos não pagos, quando geradas)
         </p>
       </div>
 
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3 mb-3">
-          <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
-            <Icon name="lucide:arrow-up-circle" class="w-5 h-5 text-red-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:arrow-up-circle" class="w-5 h-5 text-slate-600" />
           </div>
           <span class="text-sm font-medium text-slate-500">A Pagar</span>
         </div>
-        <p class="text-2xl font-bold text-slate-900">{{ format(stats.payables) }}</p>
+        <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ format(stats.payables) }}</p>
         <p class="text-xs text-slate-500 mt-1">
           Contas a pagar pendentes ou parciais
         </p>
       </div>
 
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3 mb-3">
-          <div class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
-            <Icon name="lucide:trending-up" class="w-5 h-5 text-violet-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:trending-up" class="w-5 h-5 text-slate-600" />
           </div>
           <span class="text-sm font-medium text-slate-500">Lucro do Mês</span>
         </div>
-        <p class="text-2xl font-bold text-slate-900">{{ format(stats.monthlyProfit) }}</p>
+        <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ format(stats.monthlyProfit) }}</p>
         <p class="text-xs text-slate-500 mt-1">
           Receitas − despesas dos lançamentos deste mês
         </p>
@@ -132,7 +132,7 @@ onMounted(async () => {
     <!-- Main Content -->
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
       <!-- Chart -->
-      <div class="xl:col-span-2 bg-white rounded-2xl p-5 lg:p-6 shadow-sm border border-slate-100">
+      <div class="xl:col-span-2 surface-metric lg:p-6">
         <div class="flex items-center justify-between mb-6">
           <div>
             <h3 class="font-semibold text-slate-900">Fluxo da Semana</h3>
@@ -172,8 +172,8 @@ onMounted(async () => {
       </div>
 
       <!-- Recent Transactions -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="px-5 lg:px-6 py-4 border-b border-slate-100">
+      <div class="surface-panel">
+        <div class="px-5 lg:px-6 py-4 border-b border-slate-100/90">
           <h3 class="font-semibold text-slate-900">Transações Recentes</h3>
         </div>
 
@@ -184,7 +184,7 @@ onMounted(async () => {
             class="flex items-center gap-3 px-5 lg:px-6 py-4 hover:bg-slate-50/50 transition-colors"
           >
             <div
-              class="w-10 h-10 rounded-xl flex items-center justify-center"
+              class="w-10 h-10 rounded-lg flex items-center justify-center"
               :class="transaction.transaction_type === 'income' ? 'bg-emerald-100' : 'bg-red-100'"
             >
               <Icon

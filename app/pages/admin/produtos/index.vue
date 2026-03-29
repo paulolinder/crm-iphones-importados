@@ -102,46 +102,46 @@ onMounted(async () => {
 
     <!-- Stats -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-            <Icon name="lucide:package" class="w-5 h-5 text-blue-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:package" class="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <p class="text-2xl font-bold text-slate-900">{{ stats.total }}</p>
+            <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ stats.total }}</p>
             <p class="text-sm text-slate-500">Total de produtos</p>
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-            <Icon name="lucide:check-circle" class="w-5 h-5 text-emerald-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:check-circle" class="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <p class="text-2xl font-bold text-slate-900">{{ stats.active }}</p>
+            <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ stats.active }}</p>
             <p class="text-sm text-slate-500">Em estoque</p>
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-            <Icon name="lucide:alert-triangle" class="w-5 h-5 text-amber-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:alert-triangle" class="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <p class="text-2xl font-bold text-slate-900">{{ stats.lowStock }}</p>
+            <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ stats.lowStock }}</p>
             <p class="text-sm text-slate-500">Estoque baixo</p>
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
-            <Icon name="lucide:x-circle" class="w-5 h-5 text-red-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:x-circle" class="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <p class="text-2xl font-bold text-slate-900">{{ stats.outOfStock }}</p>
+            <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ stats.outOfStock }}</p>
             <p class="text-sm text-slate-500">Sem estoque</p>
           </div>
         </div>
@@ -149,7 +149,7 @@ onMounted(async () => {
     </div>
 
     <!-- Filters -->
-    <div class="bg-white rounded-2xl p-4 lg:p-5 shadow-sm border border-slate-100">
+    <div class="surface-toolbar">
       <div class="flex flex-col lg:flex-row gap-4">
         <div class="flex-1 relative">
           <Icon name="lucide:search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -157,13 +157,13 @@ onMounted(async () => {
             v-model="searchQuery"
             type="text"
             placeholder="Buscar por nome ou SKU..."
-            class="w-full pl-12 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            class="form-input pl-12"
           />
         </div>
         <div class="flex gap-3">
           <select
             v-model="selectedCategory"
-            class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            class="form-select min-w-[180px]"
           >
             <option value="">Todas as categorias</option>
             <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
@@ -196,7 +196,7 @@ onMounted(async () => {
       <div
         v-for="product in products"
         :key="product.id"
-        class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-lg transition-all duration-300 group"
+        class="bg-white rounded-lg border border-slate-200 overflow-hidden transition-colors hover:border-slate-300 group"
       >
         <!-- Image -->
         <div class="relative aspect-square bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
@@ -204,7 +204,7 @@ onMounted(async () => {
           <!-- Status Badge -->
           <div class="absolute top-3 left-3">
             <span
-              class="px-2.5 py-1 rounded-full text-xs font-semibold"
+              class="px-2.5 py-0.5 rounded-full text-xs font-medium"
               :class="[getStockStatus(product).bg, getStockStatus(product).text]"
             >
               {{ getStockStatus(product).label }}
@@ -214,14 +214,14 @@ onMounted(async () => {
           <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <NuxtLink
               :to="`/admin/produtos/${product.id}`"
-              class="p-2 bg-white rounded-lg shadow-md text-slate-600 hover:text-blue-600 transition-colors"
+              class="p-2 bg-white/95 rounded-lg border border-slate-200/80 shadow-sm text-slate-600 hover:text-primary-600 transition-colors"
               title="Ver detalhes"
             >
               <Icon name="lucide:eye" class="w-4 h-4" />
             </NuxtLink>
             <NuxtLink
               :to="`/admin/produtos/${product.id}/editar`"
-              class="p-2 bg-white rounded-lg shadow-md text-slate-600 hover:text-blue-600 transition-colors"
+              class="p-2 bg-white/95 rounded-lg border border-slate-200/80 shadow-sm text-slate-600 hover:text-primary-600 transition-colors"
             >
               <Icon name="lucide:edit" class="w-4 h-4" />
             </NuxtLink>
@@ -234,7 +234,7 @@ onMounted(async () => {
           <h3 class="font-semibold text-slate-900 mb-2 line-clamp-2">{{ product.name }}</h3>
 
           <div class="flex items-center justify-between">
-            <span class="text-lg font-bold text-slate-900">{{ format(product.price) }}</span>
+            <span class="text-lg font-semibold tabular-nums text-slate-900">{{ format(product.price) }}</span>
             <span class="text-sm text-slate-500">{{ product.stock_quantity }} un.</span>
           </div>
 
@@ -247,7 +247,7 @@ onMounted(async () => {
     </div>
 
     <!-- Products List -->
-    <div v-else class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    <div v-else class="surface-panel">
       <table class="w-full">
         <thead>
           <tr class="bg-slate-50/50">

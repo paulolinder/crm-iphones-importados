@@ -33,7 +33,7 @@ watch(mobileOpen, (open) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-slate-100">
+  <div class="min-h-screen bg-slate-50">
     <!-- Mobile Overlay -->
     <Transition
       enter-active-class="transition-opacity duration-300"

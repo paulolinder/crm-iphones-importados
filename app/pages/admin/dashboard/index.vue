@@ -32,7 +32,6 @@ const kpis = ref([
     previousValue: 98420,
     format: 'currency',
     icon: 'lucide:trending-up',
-    color: 'emerald',
     trend: 'up',
   },
   {
@@ -42,7 +41,6 @@ const kpis = ref([
     previousValue: 142,
     format: 'number',
     icon: 'lucide:shopping-cart',
-    color: 'blue',
     trend: 'up',
   },
   {
@@ -52,7 +50,6 @@ const kpis = ref([
     previousValue: 52,
     format: 'number',
     icon: 'lucide:users',
-    color: 'violet',
     trend: 'down',
   },
   {
@@ -62,7 +59,6 @@ const kpis = ref([
     previousValue: 2180,
     format: 'currency',
     icon: 'lucide:receipt',
-    color: 'amber',
     trend: 'up',
   },
 ])
@@ -83,28 +79,24 @@ const quickActions = [
     description: 'Registrar pedido',
     icon: 'lucide:plus-circle',
     to: '/admin/vendas/nova',
-    color: 'blue',
   },
   {
     title: 'Novo Cliente',
     description: 'Cadastrar cliente',
     icon: 'lucide:user-plus',
     to: '/admin/clientes/novo',
-    color: 'emerald',
   },
   {
     title: 'Entrada Estoque',
     description: 'Adicionar produtos',
     icon: 'lucide:package-plus',
     to: '/admin/estoque/entrada',
-    color: 'violet',
   },
   {
     title: 'Relatórios',
     description: 'Ver análises',
     icon: 'lucide:bar-chart-3',
     to: '/admin/relatorios',
-    color: 'amber',
   },
 ]
 
@@ -180,15 +172,15 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
     <!-- Header -->
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
       <div>
-        <h1 class="text-2xl lg:text-3xl font-bold text-slate-900">
-          {{ greeting }}, Administrador! 👋
+        <h1 class="text-xl lg:text-2xl font-semibold text-slate-900 tracking-tight">
+          {{ greeting }}, Administrador
         </h1>
-        <p class="text-slate-500 mt-1">
+        <p class="text-sm text-slate-500 mt-1">
           Aqui está o resumo do seu negócio hoje.
         </p>
       </div>
       <div class="flex items-center gap-3">
-        <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div class="flex items-center gap-2 px-3 py-1.5 bg-white rounded-md border border-slate-200">
           <Icon name="lucide:calendar" class="w-4 h-4 text-slate-400" />
           <span class="text-sm font-medium text-slate-700">
             {{ formatDate(currentDate, "dd 'de' MMMM 'de' yyyy") }}
@@ -202,37 +194,18 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
       <div
         v-for="kpi in kpis"
         :key="kpi.id"
-        class="relative bg-white rounded-2xl p-5 lg:p-6 shadow-sm hover:shadow-lg border border-slate-100 transition-all duration-300 group overflow-hidden"
+        class="surface-metric lg:p-6"
       >
-        <!-- Background Decoration -->
-        <div
-          class="absolute -right-8 -top-8 w-32 h-32 rounded-full opacity-5 transition-transform group-hover:scale-110"
-          :class="[
-            kpi.color === 'emerald' ? 'bg-emerald-500' : '',
-            kpi.color === 'blue' ? 'bg-blue-500' : '',
-            kpi.color === 'violet' ? 'bg-violet-500' : '',
-            kpi.color === 'amber' ? 'bg-amber-500' : '',
-          ]"
-        />
-
-        <div class="relative">
+        <div>
           <!-- Icon & Title -->
-          <div class="flex items-center justify-between mb-4">
-            <div
-              class="w-12 h-12 rounded-xl flex items-center justify-center"
-              :class="[
-                kpi.color === 'emerald' ? 'bg-emerald-100 text-emerald-600' : '',
-                kpi.color === 'blue' ? 'bg-blue-100 text-blue-600' : '',
-                kpi.color === 'violet' ? 'bg-violet-100 text-violet-600' : '',
-                kpi.color === 'amber' ? 'bg-amber-100 text-amber-600' : '',
-              ]"
-            >
-              <Icon :name="kpi.icon" class="w-6 h-6" />
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-9 h-9 rounded-md bg-slate-100 flex items-center justify-center text-slate-600">
+              <Icon :name="kpi.icon" class="w-[18px] h-[18px]" />
             </div>
 
             <!-- Trend Badge -->
             <div
-              class="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
+              class="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-medium tabular-nums"
               :class="[
                 kpi.trend === 'up' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700',
               ]"
@@ -247,7 +220,7 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
 
           <!-- Value -->
           <div class="mb-1">
-            <span class="text-2xl lg:text-3xl font-bold text-slate-900">
+            <span class="text-2xl lg:text-3xl font-semibold tabular-nums text-slate-900">
               {{ formatKpiValue(kpi) }}
             </span>
           </div>
@@ -264,33 +237,14 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
         v-for="action in quickActions"
         :key="action.title"
         :to="action.to"
-        class="group relative bg-white rounded-2xl p-4 lg:p-5 shadow-sm hover:shadow-lg border border-slate-100 transition-all duration-300 overflow-hidden"
+        class="flex flex-col items-center text-center gap-2.5 bg-white rounded-lg border border-slate-200 p-4 lg:p-5 transition-colors hover:border-slate-300 hover:bg-slate-50/50"
       >
-        <div
-          class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-          :class="[
-            action.color === 'blue' ? 'bg-gradient-to-br from-blue-500/5 to-transparent' : '',
-            action.color === 'emerald' ? 'bg-gradient-to-br from-emerald-500/5 to-transparent' : '',
-            action.color === 'violet' ? 'bg-gradient-to-br from-violet-500/5 to-transparent' : '',
-            action.color === 'amber' ? 'bg-gradient-to-br from-amber-500/5 to-transparent' : '',
-          ]"
-        />
-        <div class="relative flex flex-col items-center text-center gap-3">
-          <div
-            class="w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
-            :class="[
-              action.color === 'blue' ? 'bg-blue-100 text-blue-600' : '',
-              action.color === 'emerald' ? 'bg-emerald-100 text-emerald-600' : '',
-              action.color === 'violet' ? 'bg-violet-100 text-violet-600' : '',
-              action.color === 'amber' ? 'bg-amber-100 text-amber-600' : '',
-            ]"
-          >
-            <Icon :name="action.icon" class="w-6 h-6" />
-          </div>
-          <div>
-            <h3 class="font-semibold text-slate-900">{{ action.title }}</h3>
-            <p class="text-xs text-slate-500 mt-0.5">{{ action.description }}</p>
-          </div>
+        <div class="w-9 h-9 rounded-md bg-slate-100 flex items-center justify-center text-slate-600">
+          <Icon :name="action.icon" class="w-[18px] h-[18px]" />
+        </div>
+        <div>
+          <h3 class="text-sm font-medium text-slate-900">{{ action.title }}</h3>
+          <p class="text-xs text-slate-500 mt-0.5">{{ action.description }}</p>
         </div>
       </NuxtLink>
     </div>
@@ -298,15 +252,15 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
     <!-- Main Content Grid -->
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
       <!-- Recent Orders -->
-      <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="flex items-center justify-between px-5 lg:px-6 py-4 border-b border-slate-100">
+      <div class="xl:col-span-2 surface-panel">
+        <div class="flex items-center justify-between px-5 lg:px-6 py-4 border-b border-slate-100/90">
           <div>
-            <h2 class="text-lg font-semibold text-slate-900">Pedidos Recentes</h2>
+            <h2 class="text-base font-semibold text-slate-900 tracking-tight">Pedidos Recentes</h2>
             <p class="text-sm text-slate-500">Últimas vendas realizadas</p>
           </div>
           <NuxtLink
             to="/admin/vendas"
-            class="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            class="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1"
           >
             Ver todos
             <Icon name="lucide:arrow-right" class="w-4 h-4" />
@@ -321,7 +275,7 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
             class="flex items-center gap-4 px-5 lg:px-6 py-4 hover:bg-slate-50/50 transition-colors cursor-pointer"
           >
             <!-- Order Number -->
-            <div class="hidden sm:flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100 text-slate-600 font-semibold text-sm">
+            <div class="hidden sm:flex items-center justify-center w-10 h-10 rounded-md bg-slate-100 text-slate-600 font-medium text-xs">
               {{ order.number }}
             </div>
 
@@ -336,7 +290,7 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
 
             <!-- Status -->
             <div
-              class="hidden lg:block px-3 py-1 rounded-full text-xs font-medium"
+              class="hidden lg:block px-2 py-0.5 rounded-md text-xs font-medium"
               :class="[statusConfig[order.status].bg, statusConfig[order.status].color]"
             >
               {{ statusConfig[order.status].label }}
@@ -354,15 +308,15 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
       <!-- Side Panel -->
       <div class="space-y-6">
         <!-- Weekly Chart -->
-        <div class="bg-white rounded-2xl p-5 lg:p-6 shadow-sm border border-slate-100">
+        <div class="surface-metric lg:p-6">
           <div class="flex items-center justify-between mb-6">
             <div>
-              <h3 class="font-semibold text-slate-900">Vendas da Semana</h3>
+              <h3 class="text-sm font-semibold text-slate-900">Vendas da Semana</h3>
               <p class="text-sm text-slate-500">Últimos 7 dias</p>
             </div>
             <div class="text-right">
-              <p class="text-lg font-bold text-slate-900">{{ format(weeklyData.values.reduce((a, b) => a + b, 0)) }}</p>
-              <p class="text-xs text-emerald-600 font-medium">+12% vs semana anterior</p>
+              <p class="text-lg font-semibold tabular-nums text-slate-900">{{ format(weeklyData.values.reduce((a, b) => a + b, 0)) }}</p>
+              <p class="text-xs text-slate-500">+12% vs semana anterior</p>
             </div>
           </div>
 
@@ -374,8 +328,8 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
               class="flex-1 flex flex-col items-center gap-2"
             >
               <div
-                class="w-full rounded-t-lg transition-all duration-300 hover:opacity-80"
-                :class="index === 4 ? 'bg-blue-500' : 'bg-blue-200'"
+                class="w-full min-h-[4px] rounded-t-sm bg-slate-200 transition-colors hover:bg-slate-300"
+                :class="index === 4 ? '!bg-primary-500 hover:!bg-primary-600' : ''"
                 :style="{ height: `${(value / maxWeeklyValue) * 100}%` }"
               />
               <span class="text-xs text-slate-400 font-medium">{{ weeklyData.labels[index] }}</span>
@@ -384,20 +338,20 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
         </div>
 
         <!-- Low Stock Alert -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div class="flex items-center justify-between px-5 lg:px-6 py-4 border-b border-slate-100">
+        <div class="surface-panel">
+          <div class="flex items-center justify-between px-5 lg:px-6 py-4 border-b border-slate-100/90">
             <div class="flex items-center gap-2">
-              <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
-                <Icon name="lucide:alert-triangle" class="w-4 h-4 text-amber-600" />
+              <div class="w-8 h-8 rounded-md bg-slate-100 flex items-center justify-center text-slate-600">
+                <Icon name="lucide:alert-triangle" class="w-4 h-4" />
               </div>
               <div>
-                <h3 class="font-semibold text-slate-900">Estoque Baixo</h3>
+                <h3 class="text-sm font-semibold text-slate-900">Estoque Baixo</h3>
                 <p class="text-xs text-slate-500">{{ lowStockItems.length }} produtos</p>
               </div>
             </div>
             <NuxtLink
               to="/admin/estoque"
-              class="text-sm font-medium text-blue-600 hover:text-blue-700"
+              class="text-sm font-medium text-primary-600 hover:text-primary-700"
             >
               Ver todos
             </NuxtLink>
@@ -417,7 +371,7 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
                 <p class="text-xs text-slate-400">{{ item.sku }}</p>
               </div>
               <div class="text-right">
-                <span class="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-lg bg-red-100 text-red-700 text-sm font-bold">
+                <span class="inline-flex items-center justify-center min-w-[26px] h-6 px-1.5 rounded-md bg-red-50 text-red-700 text-xs font-semibold tabular-nums">
                   {{ item.stock }}
                 </span>
               </div>
@@ -428,15 +382,15 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
     </div>
 
     <!-- Top Products -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-      <div class="flex items-center justify-between px-5 lg:px-6 py-4 border-b border-slate-100">
+    <div class="surface-panel">
+      <div class="flex items-center justify-between px-5 lg:px-6 py-4 border-b border-slate-100/90">
         <div>
-          <h2 class="text-lg font-semibold text-slate-900">Produtos Mais Vendidos</h2>
+          <h2 class="text-base font-semibold text-slate-900 tracking-tight">Produtos Mais Vendidos</h2>
           <p class="text-sm text-slate-500">Performance do mês</p>
         </div>
         <NuxtLink
           to="/admin/relatorios"
-          class="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
+          class="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1"
         >
           Ver relatório completo
           <Icon name="lucide:arrow-right" class="w-4 h-4" />
@@ -446,11 +400,11 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead>
-            <tr class="bg-slate-50/50">
-              <th class="text-left px-5 lg:px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Produto</th>
-              <th class="text-center px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Vendas</th>
-              <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Receita</th>
-              <th class="text-right px-5 lg:px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Tendência</th>
+            <tr class="bg-slate-50 border-b border-slate-200">
+              <th class="text-left px-5 lg:px-6 py-2.5 text-xs font-medium text-slate-500">Produto</th>
+              <th class="text-center px-4 py-2.5 text-xs font-medium text-slate-500">Vendas</th>
+              <th class="text-right px-4 py-2.5 text-xs font-medium text-slate-500">Receita</th>
+              <th class="text-right px-5 lg:px-6 py-2.5 text-xs font-medium text-slate-500">Tendência</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-50">
@@ -461,7 +415,7 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
             >
               <td class="px-5 lg:px-6 py-4">
                 <div class="flex items-center gap-3">
-                  <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-slate-600 font-bold text-sm">
+                  <div class="flex items-center justify-center w-7 h-7 rounded-md bg-slate-100 text-slate-600 font-medium text-xs tabular-nums">
                     {{ index + 1 }}
                   </div>
                   <span class="font-medium text-slate-900">{{ product.name }}</span>
@@ -475,7 +429,7 @@ const maxWeeklyValue = computed(() => Math.max(...weeklyData.value.values))
               </td>
               <td class="text-right px-5 lg:px-6 py-4">
                 <span
-                  class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold"
+                  class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-medium tabular-nums"
                   :class="product.trend > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'"
                 >
                   <Icon

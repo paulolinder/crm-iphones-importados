@@ -138,46 +138,46 @@ onMounted(async () => {
 
     <!-- Stats -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 shadow-lg shadow-emerald-500/20">
+      <div class="bg-emerald-600 rounded-lg p-5 text-white">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+          <div class="w-10 h-10 rounded-md bg-white/15 flex items-center justify-center">
             <Icon name="lucide:trending-up" class="w-5 h-5 text-white" />
           </div>
           <div>
-            <p class="text-2xl font-bold text-white">{{ stats.today }}</p>
+            <p class="text-2xl font-semibold tabular-nums text-white">{{ stats.today }}</p>
             <p class="text-sm text-emerald-100">Vendas hoje</p>
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-            <Icon name="lucide:clock" class="w-5 h-5 text-amber-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:clock" class="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <p class="text-2xl font-bold text-slate-900">{{ stats.pending }}</p>
+            <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ stats.pending }}</p>
             <p class="text-sm text-slate-500">Pendentes</p>
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-            <Icon name="lucide:check" class="w-5 h-5 text-blue-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:check" class="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <p class="text-2xl font-bold text-slate-900">{{ stats.confirmed }}</p>
+            <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ stats.confirmed }}</p>
             <p class="text-sm text-slate-500">Confirmados</p>
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
-            <Icon name="lucide:shopping-bag" class="w-5 h-5 text-violet-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:shopping-bag" class="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <p class="text-2xl font-bold text-slate-900">{{ stats.total }}</p>
+            <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ stats.total }}</p>
             <p class="text-sm text-slate-500">Total de pedidos</p>
           </div>
         </div>
@@ -185,21 +185,21 @@ onMounted(async () => {
     </div>
 
     <!-- Filters & Orders -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    <div class="surface-panel">
       <!-- Filters -->
-      <div class="p-4 lg:p-5 border-b border-slate-100 flex flex-col sm:flex-row gap-4">
+      <div class="p-4 lg:p-5 border-b border-slate-100/90 flex flex-col sm:flex-row gap-4">
         <div class="flex-1 relative">
           <Icon name="lucide:search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
             v-model="searchQuery"
             type="text"
             placeholder="Buscar por número ou cliente..."
-            class="w-full pl-12 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            class="form-input pl-12"
           />
         </div>
         <select
           v-model="selectedStatus"
-          class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+          class="form-select min-w-[160px]"
         >
           <option value="">Todos os status</option>
           <option value="pending">Pendente</option>

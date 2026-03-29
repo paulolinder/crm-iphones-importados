@@ -99,46 +99,46 @@ onMounted(async () => {
 
     <!-- Stats -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-            <Icon name="lucide:users" class="w-5 h-5 text-blue-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:users" class="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <p class="text-2xl font-bold text-slate-900">{{ stats.total }}</p>
+            <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ stats.total }}</p>
             <p class="text-sm text-slate-500">Total de clientes</p>
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-            <Icon name="lucide:user-check" class="w-5 h-5 text-emerald-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:user-check" class="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <p class="text-2xl font-bold text-slate-900">{{ stats.active }}</p>
+            <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ stats.active }}</p>
             <p class="text-sm text-slate-500">Clientes ativos</p>
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-            <Icon name="lucide:crown" class="w-5 h-5 text-amber-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:crown" class="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <p class="text-2xl font-bold text-slate-900">{{ stats.vip }}</p>
+            <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ stats.vip }}</p>
             <p class="text-sm text-slate-500">Clientes VIP</p>
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
-            <Icon name="lucide:wallet" class="w-5 h-5 text-violet-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:wallet" class="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <p class="text-2xl font-bold text-slate-900">{{ format(stats.totalRevenue) }}</p>
+            <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ format(stats.totalRevenue) }}</p>
             <p class="text-sm text-slate-500">Receita total</p>
           </div>
         </div>
@@ -146,21 +146,21 @@ onMounted(async () => {
     </div>
 
     <!-- Filters & Table -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    <div class="surface-panel">
       <!-- Filters -->
-      <div class="p-4 lg:p-5 border-b border-slate-100 flex flex-col sm:flex-row gap-4">
+      <div class="p-4 lg:p-5 border-b border-slate-100/90 flex flex-col sm:flex-row gap-4">
         <div class="flex-1 relative">
           <Icon name="lucide:search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
             v-model="searchQuery"
             type="text"
             placeholder="Buscar por nome ou email..."
-            class="w-full pl-12 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            class="form-input pl-12"
           />
         </div>
         <select
           v-model="selectedStatus"
-          class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+          class="form-select min-w-[160px]"
         >
           <option value="">Todos os status</option>
           <option value="lead">Leads</option>

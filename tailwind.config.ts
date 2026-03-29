@@ -109,10 +109,11 @@ export default {
 
       // Box shadows
       boxShadow: {
-        card: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-        'card-hover': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-        dropdown: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-        modal: '0 25px 50px -12px rgb(0 0 0 / 0.25)',
+        card: '0 1px 2px 0 rgb(15 23 42 / 0.05)',
+        'card-hover':
+          '0 4px 6px -1px rgb(15 23 42 / 0.06), 0 2px 4px -2px rgb(15 23 42 / 0.04)',
+        dropdown: '0 10px 15px -3px rgb(15 23 42 / 0.08), 0 4px 6px -4px rgb(15 23 42 / 0.04)',
+        modal: '0 20px 40px -12px rgb(15 23 42 / 0.18)',
       },
 
       // Border radius

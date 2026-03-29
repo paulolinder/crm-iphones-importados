@@ -2,7 +2,7 @@
 /**
  * AppPageHeader
  *
- * Header de página com design premium
+ * Cabeçalho de página — hierarquia calma, ações via design system (.btn)
  */
 
 import type { BreadcrumbItem, HeaderAction } from '~/types'
@@ -31,6 +31,20 @@ function runHeaderAction(action: HeaderAction) {
   }
   toastInfo('Em breve', 'Esta ação ainda não está disponível nesta tela.')
 }
+
+function actionButtonClass(variant?: HeaderAction['variant']) {
+  const v = variant ?? 'outline'
+  const map: Record<NonNullable<HeaderAction['variant']>, string> = {
+    primary: 'btn btn-primary',
+    secondary: 'btn btn-secondary',
+    outline: 'btn btn-outline',
+    ghost: 'btn btn-ghost',
+    danger: 'btn btn-danger',
+    success: 'btn btn-success',
+    link: 'text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline px-2 py-1.5 rounded-md',
+  }
+  return map[v] ?? map.outline
+}
 </script>
 
 <template>
@@ -55,50 +69,37 @@ function runHeaderAction(action: HeaderAction) {
           >
             {{ item.label }}
           </NuxtLink>
-          <span v-else class="text-slate-900 font-medium">{{ item.label }}</span>
+          <span v-else class="text-slate-800 font-medium">{{ item.label }}</span>
         </li>
       </ol>
     </nav>
 
     <!-- Title and Actions -->
     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-      <div>
-        <h1 class="text-2xl lg:text-3xl font-bold text-slate-900">{{ title }}</h1>
-        <p v-if="description" class="text-slate-500 mt-1">{{ description }}</p>
+      <div class="min-w-0">
+        <h1 class="text-xl lg:text-2xl font-semibold text-slate-900 tracking-tight">
+          {{ title }}
+        </h1>
+        <p v-if="description" class="text-sm text-slate-500 mt-1 max-w-2xl">
+          {{ description }}
+        </p>
       </div>
 
-      <div v-if="actions?.length" class="flex flex-wrap items-center gap-2 sm:gap-3">
+      <div v-if="actions?.length" class="flex flex-wrap items-center gap-2 sm:justify-end shrink-0">
         <template v-for="action in actions" :key="action.key">
           <NuxtLink
             v-if="action.to"
             :to="action.to"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
-            :class="[
-              action.variant === 'primary'
-                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40'
-                : '',
-              action.variant === 'secondary' ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : '',
-              action.variant === 'outline' ? 'border-2 border-slate-200 text-slate-700 hover:bg-slate-50' : '',
-              action.variant === 'ghost' ? 'text-slate-600 hover:bg-slate-100' : '',
-              !action.variant ? 'border border-slate-200 text-slate-700 hover:bg-slate-50' : '',
-            ]"
+            :class="actionButtonClass(action.variant)"
           >
             <Icon v-if="action.icon" :name="action.icon" class="w-4 h-4" />
             {{ action.label }}
           </NuxtLink>
           <button
             v-else
+            type="button"
             :disabled="action.disabled"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-50"
-            :class="[
-              action.variant === 'primary'
-                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40'
-                : '',
-              action.variant === 'secondary' ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : '',
-              action.variant === 'outline' ? 'border-2 border-slate-200 text-slate-700 hover:bg-slate-50' : '',
-              action.variant === 'ghost' ? 'text-slate-600 hover:bg-slate-100' : '',
-              !action.variant ? 'border border-slate-200 text-slate-700 hover:bg-slate-50' : '',
-            ]"
+            :class="actionButtonClass(action.variant)"
             @click="runHeaderAction(action)"
           >
             <Icon v-if="action.icon" :name="action.icon" class="w-4 h-4" />

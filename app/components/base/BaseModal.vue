@@ -94,7 +94,7 @@ const sizeClasses = {
         >
           <div
             v-if="isOpen"
-            class="relative w-full max-h-[min(90vh,800px)] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl border border-slate-200"
+            class="relative w-full max-h-[min(90vh,800px)] flex flex-col overflow-hidden rounded-lg bg-white border border-slate-200"
             :class="sizeClasses[size]"
             role="dialog"
             aria-modal="true"

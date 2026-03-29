@@ -80,46 +80,46 @@ function onRegisterImeiClick() {
 
     <!-- Stats -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-            <Icon name="lucide:boxes" class="w-5 h-5 text-blue-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:boxes" class="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <p class="text-2xl font-bold text-slate-900">{{ stats.totalItems.toLocaleString() }}</p>
+            <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ stats.totalItems.toLocaleString() }}</p>
             <p class="text-sm text-slate-500">Itens em estoque</p>
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-            <Icon name="lucide:wallet" class="w-5 h-5 text-emerald-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:wallet" class="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <p class="text-2xl font-bold text-slate-900">{{ format(stats.totalValue) }}</p>
+            <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ format(stats.totalValue) }}</p>
             <p class="text-sm text-slate-500">Valor total</p>
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-            <Icon name="lucide:alert-triangle" class="w-5 h-5 text-amber-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:alert-triangle" class="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <p class="text-2xl font-bold text-slate-900">{{ stats.lowStock }}</p>
+            <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ stats.lowStock }}</p>
             <p class="text-sm text-slate-500">Estoque baixo</p>
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+      <div class="surface-metric">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
-            <Icon name="lucide:x-circle" class="w-5 h-5 text-red-600" />
+          <div class="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center">
+            <Icon name="lucide:x-circle" class="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <p class="text-2xl font-bold text-slate-900">{{ stats.outOfStock }}</p>
+            <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ stats.outOfStock }}</p>
             <p class="text-sm text-slate-500">Sem estoque</p>
           </div>
         </div>
@@ -127,8 +127,8 @@ function onRegisterImeiClick() {
     </div>
 
     <!-- Tabs -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-      <div class="flex border-b border-slate-100">
+    <div class="surface-panel">
+      <div class="flex border-b border-slate-100/90">
         <button
           v-for="tab in [
             { key: 'overview', label: 'Visão Geral', icon: 'lucide:layout-grid' },
@@ -218,7 +218,7 @@ function onRegisterImeiClick() {
             class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl"
           >
             <div
-              class="w-10 h-10 rounded-xl flex items-center justify-center"
+              class="w-10 h-10 rounded-lg flex items-center justify-center"
               :class="movement.type === 'entry' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'"
             >
               <Icon :name="movement.type === 'entry' ? 'lucide:arrow-down' : 'lucide:arrow-up'" class="w-5 h-5" />

@@ -37,7 +37,7 @@ const emit = defineEmits<{
       <slot name="header">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-base font-semibold text-slate-900">{{ title }}</h3>
+            <h3 class="text-sm font-semibold text-slate-900 tracking-tight">{{ title }}</h3>
             <p v-if="description" class="text-sm text-slate-500 mt-0.5">{{ description }}</p>
           </div>
           <slot name="header-actions" />

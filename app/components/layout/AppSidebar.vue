@@ -57,16 +57,12 @@ const menuGroups = [
         label: 'Clientes',
         icon: 'lucide:users',
         to: '/admin/clientes',
-        badge: '24',
-        badgeColor: 'primary',
       },
       {
         key: 'vendas',
         label: 'Vendas',
         icon: 'lucide:shopping-cart',
         to: '/admin/vendas',
-        badge: '3',
-        badgeColor: 'success',
       },
       {
         key: 'pedidos',
@@ -97,8 +93,6 @@ const menuGroups = [
         label: 'Estoque',
         icon: 'lucide:boxes',
         to: '/admin/estoque',
-        badge: '!',
-        badgeColor: 'warning',
       },
     ],
   },
@@ -192,7 +186,7 @@ const sidebarClasses = computed(() => {
 <template>
   <aside
     :class="sidebarClasses"
-    class="flex flex-col bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 shadow-2xl"
+    class="flex flex-col bg-slate-900 border-r border-slate-800/80"
   >
     <!-- Logo Area -->
     <div class="flex items-center h-[72px] px-5 border-b border-white/5">
@@ -203,18 +197,17 @@ const sidebarClasses = computed(() => {
       >
         <!-- Logo Icon -->
         <div class="relative flex-shrink-0">
-          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 transition-shadow">
-            <Icon name="lucide:smartphone" class="w-6 h-6 text-white" />
+          <div class="w-9 h-9 rounded-md bg-primary-600 flex items-center justify-center transition-opacity group-hover:opacity-90">
+            <Icon name="lucide:smartphone" class="w-[18px] h-[18px] text-white" />
           </div>
-          <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-slate-900" />
         </div>
 
         <!-- Logo Text -->
         <div v-if="!collapsed || isMobile" class="flex-1 min-w-0">
-          <h1 class="text-lg font-bold text-white tracking-tight">
+          <h1 class="text-[15px] font-semibold text-white tracking-tight">
             Eleve Imports
           </h1>
-          <p class="text-[11px] text-slate-400 font-medium uppercase tracking-wider">
+          <p class="text-[11px] text-slate-500">
             Sistema de Gestão
           </p>
         </div>
@@ -227,7 +220,7 @@ const sidebarClasses = computed(() => {
         <!-- Group Title -->
         <h3
           v-if="!collapsed || isMobile"
-          class="px-3 mb-2 text-[10px] font-semibold text-slate-500 uppercase tracking-widest"
+          class="px-3 mb-1.5 text-[11px] font-medium text-slate-500"
         >
           {{ group.title }}
         </h3>
@@ -239,31 +232,19 @@ const sidebarClasses = computed(() => {
             <NuxtLink
               :to="item.to"
               :title="collapsed && !isMobile ? item.label : undefined"
-              class="relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group"
+              class="relative flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 group"
               :class="[
                 isActive(item)
-                  ? 'bg-gradient-to-r from-blue-600/90 to-blue-500/90 text-white shadow-lg shadow-blue-500/20'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5',
+                  ? 'bg-white/[0.08] text-white'
+                  : 'text-slate-400 hover:text-white hover:bg-white/[0.04]',
               ]"
               @click="handleNavigation"
             >
-              <!-- Active Indicator -->
-              <div
-                v-if="isActive(item)"
-                class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full"
+              <Icon
+                :name="item.icon"
+                class="flex-shrink-0 w-[18px] h-[18px]"
+                :class="isActive(item) ? 'text-white' : 'text-slate-500 group-hover:text-slate-200'"
               />
-
-              <!-- Icon -->
-              <div
-                class="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
-                :class="[
-                  isActive(item)
-                    ? 'bg-white/20'
-                    : 'bg-slate-800/50 group-hover:bg-slate-700/50',
-                ]"
-              >
-                <Icon :name="item.icon" class="w-5 h-5" />
-              </div>
 
               <!-- Label -->
               <span
@@ -271,20 +252,6 @@ const sidebarClasses = computed(() => {
                 class="flex-1 truncate"
               >
                 {{ item.label }}
-              </span>
-
-              <!-- Badge -->
-              <span
-                v-if="item.badge && (!collapsed || isMobile)"
-                class="px-2 py-0.5 text-[10px] font-bold rounded-full"
-                :class="[
-                  item.badgeColor === 'success' ? 'bg-emerald-500/20 text-emerald-400' : '',
-                  item.badgeColor === 'warning' ? 'bg-amber-500/20 text-amber-400' : '',
-                  item.badgeColor === 'primary' ? 'bg-blue-500/20 text-blue-400' : '',
-                  !item.badgeColor ? 'bg-slate-700 text-slate-300' : '',
-                ]"
-              >
-                {{ item.badge }}
               </span>
             </NuxtLink>
           </li>
@@ -297,9 +264,9 @@ const sidebarClasses = computed(() => {
       <!-- User Card -->
       <div
         v-if="!collapsed || isMobile"
-        class="flex items-center gap-3 p-3 rounded-xl bg-white/5 mb-3"
+        class="flex items-center gap-3 p-2.5 rounded-md bg-white/[0.05] mb-2"
       >
-        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold text-sm shadow-lg">
+        <div class="w-8 h-8 rounded-md bg-slate-700 flex items-center justify-center text-white text-xs font-medium">
           A
         </div>
         <div class="flex-1 min-w-0">
@@ -320,7 +287,7 @@ const sidebarClasses = computed(() => {
       <!-- Collapse Button (Desktop only) -->
       <button
         v-if="!isMobile"
-        class="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
+        class="w-full flex items-center justify-center gap-2 py-2 text-sm text-slate-500 hover:text-white hover:bg-white/[0.06] rounded-md transition-colors"
         @click="toggle"
       >
         <Icon

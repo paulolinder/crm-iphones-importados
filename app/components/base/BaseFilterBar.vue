@@ -56,7 +56,7 @@ const handleSearch = () => {
 </script>
 
 <template>
-  <div class="flex flex-wrap items-center gap-4 p-4 bg-slate-50 rounded-lg">
+  <div class="flex flex-wrap items-center gap-3 p-4 bg-white border border-slate-200 rounded-lg">
     <!-- Search -->
     <div v-if="showSearch" class="flex-1 min-w-[200px]">
       <div class="relative">
