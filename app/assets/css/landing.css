@@ -3,17 +3,29 @@
 
 .site-landing {
   --eleve-ink: #0c0c0d;
-  --eleve-muted: #52525b;
-  --eleve-line: #e4e4e7;
-  --eleve-surface: #fafafa;
+  --eleve-muted: #3f3f46;
+  --eleve-line: #d4d4d8;
+  --eleve-surface: #f4f4f5;
   --eleve-card: #ffffff;
   font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
   color: var(--eleve-ink);
   -webkit-font-smoothing: antialiased;
+  background:
+    radial-gradient(1000px 500px at 10% -10%, #ffffff 0%, rgba(255, 255, 255, 0) 70%),
+    radial-gradient(800px 400px at 100% 0%, #e4efe9 0%, rgba(228, 239, 233, 0) 65%),
+    var(--eleve-surface);
 }
 
 .site-landing .font-display {
   font-family: 'Source Serif 4', ui-serif, Georgia, serif;
+}
+
+.site-landing .text-zinc-600 {
+  color: #3f3f46;
+}
+
+.site-landing .text-zinc-500 {
+  color: #52525b;
 }
 
 .site-landing .eleve-container {

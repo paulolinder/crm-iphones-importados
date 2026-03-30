@@ -8,13 +8,13 @@ const highlights = [
 </script>
 
 <template>
-  <section class="border-b border-zinc-200/80 bg-white">
+  <section class="border-b border-zinc-300/80 bg-gradient-to-b from-white via-zinc-50/70 to-zinc-100/40">
     <div class="eleve-container py-16 sm:py-20 lg:py-28">
       <div class="mx-auto max-w-3xl text-center">
         <h1 class="font-display text-[1.75rem] font-semibold leading-[1.15] tracking-tight text-[var(--eleve-ink)] sm:text-4xl lg:text-[2.75rem]">
           iPhones, eletrônicos e importados com preço justo
         </h1>
-        <p class="mx-auto mt-5 max-w-xl text-base leading-relaxed text-zinc-600 sm:text-lg">
+        <p class="mx-auto mt-5 max-w-xl text-base leading-relaxed text-zinc-700 sm:text-lg">
           Compre com segurança e clareza. Atendemos Campo Novo do Parecis — MT, com foco em originais e encomenda sob medida.
         </p>
 
@@ -33,7 +33,7 @@ const highlights = [
           <WhatsAppButton size="lg" />
           <a
             href="#produtos"
-            class="inline-flex items-center justify-center rounded-full border border-zinc-200 bg-white px-6 py-3 text-base font-semibold text-zinc-800 transition-colors hover:bg-zinc-50"
+            class="inline-flex items-center justify-center rounded-full border border-zinc-300 bg-white px-6 py-3 text-base font-semibold text-zinc-900 transition-colors hover:bg-zinc-100"
           >
             Ver produtos
           </a>

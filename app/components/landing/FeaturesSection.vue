@@ -10,13 +10,13 @@ const items = [
 </script>
 
 <template>
-  <section class="border-b border-zinc-200/80 bg-white py-16 sm:py-20">
+  <section class="border-b border-zinc-300/80 bg-zinc-50/60 py-16 sm:py-20">
     <div class="eleve-container">
       <div class="mx-auto max-w-2xl text-center">
         <h2 class="font-display text-2xl font-semibold tracking-tight text-[var(--eleve-ink)] sm:text-3xl">
           Por que comprar com a gente
         </h2>
-        <p class="mt-3 text-sm text-zinc-600 sm:text-base">
+        <p class="mt-3 text-sm text-zinc-700 sm:text-base">
           Diferenciais pensados para quem quer economizar sem abrir mão de segurança.
         </p>
       </div>
@@ -25,7 +25,7 @@ const items = [
         <article
           v-for="(item, i) in items"
           :key="i"
-          class="rounded-2xl border border-zinc-200/90 bg-[var(--eleve-surface)] px-5 py-6 transition-colors hover:border-zinc-300"
+          class="rounded-2xl border border-zinc-300/80 bg-white px-5 py-6 transition-colors hover:border-zinc-400"
         >
           <p class="text-2xl" aria-hidden="true">
             {{ item.icon }}
@@ -33,7 +33,7 @@ const items = [
           <h3 class="mt-3 font-semibold text-[var(--eleve-ink)]">
             {{ item.title }}
           </h3>
-          <p class="mt-2 text-sm leading-relaxed text-zinc-600">
+          <p class="mt-2 text-sm leading-relaxed text-zinc-700">
             {{ item.text }}
           </p>
         </article>

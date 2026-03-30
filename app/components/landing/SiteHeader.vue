@@ -16,7 +16,7 @@ function closeMenu() {
 <template>
   <header
     id="inicio"
-    class="sticky top-0 z-40 border-b border-zinc-200/80 bg-[var(--eleve-surface)]/90 backdrop-blur-md"
+    class="sticky top-0 z-40 border-b border-zinc-300/80 bg-white/95 shadow-[0_1px_0_rgba(24,24,27,0.05)] backdrop-blur-md"
   >
     <div class="eleve-container flex h-16 items-center justify-between gap-4 sm:h-[4.25rem]">
       <NuxtLink
