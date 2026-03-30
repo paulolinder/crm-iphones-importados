@@ -1,29 +1,38 @@
 <script setup lang="ts">
-/**
- * Página inicial - Redireciona para login ou dashboard
- */
-
 definePageMeta({
-  layout: false,
+  layout: 'site',
 })
 
-const { isAuthenticated, isInitialized } = useAuth()
-
-onMounted(() => {
-  if (isInitialized.value) {
-    navigateTo(isAuthenticated.value ? '/admin/dashboard' : '/login')
-  }
-})
-
-watch(isInitialized, (initialized) => {
-  if (initialized) {
-    navigateTo(isAuthenticated.value ? '/admin/dashboard' : '/login')
-  }
+useHead({
+  title: 'Importados com preço justo · Campo Novo do Parecis MT',
+  meta: [
+    {
+      name: 'description',
+      content:
+        'iPhones, Apple, perfumes, eletrônicos e Starlink com preço justo. Compra por encomenda, produtos originais, entrega grátis em Campo Novo do Parecis — MT. Fale no WhatsApp.',
+    },
+    {
+      property: 'og:title',
+      content: 'Eleve Imports — Importados com preço justo',
+    },
+    {
+      property: 'og:description',
+      content:
+        'Encomenda personalizada, garantia e atendimento direto em Campo Novo do Parecis — MT.',
+    },
+  ],
 })
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 flex items-center justify-center">
-    <div class="loading-spinner" />
+  <div>
+    <LandingHeroSection />
+    <LandingAboutSection />
+    <LandingFeaturesSection />
+    <LandingHowItWorksSection />
+    <LandingProductCategoriesSection />
+    <LandingGuaranteeSection />
+    <LandingLocationSection />
+    <LandingCTASection />
   </div>
 </template>

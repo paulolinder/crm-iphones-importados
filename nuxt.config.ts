@@ -74,6 +74,9 @@ export default defineNuxtConfig({
       supabaseKey: process.env.NUXT_PUBLIC_SUPABASE_KEY ?? process.env.SUPABASE_ANON_KEY,
       appName: process.env.NUXT_PUBLIC_APP_NAME ?? 'Eleve Imports CRM',
       appVersion: process.env.NUXT_PUBLIC_APP_VERSION ?? '0.1.0',
+      /** Landing: apenas dígitos com DDI (ex.: 5565999999999) */
+      whatsappPhone: process.env.NUXT_PUBLIC_WHATSAPP_PHONE ?? '',
+      whatsappDefaultMessage: process.env.NUXT_PUBLIC_WHATSAPP_MESSAGE ?? '',
     },
   },
 
