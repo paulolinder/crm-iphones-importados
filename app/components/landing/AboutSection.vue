@@ -11,7 +11,7 @@
         </p>
       </div>
 
-      <div class="mx-auto mt-12 max-w-3xl rounded-2xl border border-zinc-200/90 bg-white px-6 py-8 sm:px-10 sm:py-10">
+      <div class="mx-auto mt-12 max-w-3xl rounded-2xl border border-zinc-300/90 bg-zinc-50 px-6 py-8 sm:px-10 sm:py-10">
         <p class="text-center text-xs font-semibold uppercase tracking-wider text-zinc-500">
           O que vendemos
         </p>

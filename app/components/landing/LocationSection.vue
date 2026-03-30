@@ -1,7 +1,7 @@
 <template>
-  <section class="border-b border-zinc-200/80 bg-white py-16 sm:py-20">
+  <section class="border-b border-zinc-300/80 bg-[var(--eleve-surface)] py-16 sm:py-20">
     <div class="eleve-container">
-      <div class="mx-auto max-w-2xl rounded-2xl border border-zinc-200 bg-[var(--eleve-surface)] px-6 py-10 text-center sm:px-10 sm:py-12">
+      <div class="mx-auto max-w-2xl rounded-2xl border border-zinc-300 bg-white px-6 py-10 text-center sm:px-10 sm:py-12">
         <Icon name="lucide:map-pin" class="mx-auto h-10 w-10 text-zinc-700" />
         <h2 class="mt-4 font-display text-2xl font-semibold tracking-tight text-[var(--eleve-ink)] sm:text-3xl">
           Onde atendemos

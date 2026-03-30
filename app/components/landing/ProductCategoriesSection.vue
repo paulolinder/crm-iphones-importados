@@ -10,7 +10,7 @@ const categories = [
 </script>
 
 <template>
-  <section id="produtos" class="scroll-mt-24 border-b border-zinc-300/80 bg-white py-16 sm:py-20">
+  <section id="produtos" class="scroll-mt-24 border-b border-zinc-300/80 bg-[var(--eleve-surface)] py-16 sm:py-20">
     <div class="eleve-container">
       <div class="mx-auto max-w-2xl text-center">
         <h2 class="font-display text-2xl font-semibold tracking-tight text-[var(--eleve-ink)] sm:text-3xl">
