@@ -23,7 +23,7 @@
           </li>
         </ul>
         <div class="mt-10 flex justify-center">
-          <LandingWhatsAppButton variant="inverted" size="lg" label="Abrir WhatsApp" />
+          <WhatsAppButton variant="inverted" size="lg" label="Abrir WhatsApp" />
         </div>
       </div>
     </div>

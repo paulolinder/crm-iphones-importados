@@ -4,11 +4,11 @@ import '~/assets/css/landing.css'
 
 <template>
   <div class="site-landing min-h-screen bg-[var(--eleve-surface)]">
-    <LandingSiteHeader />
+    <SiteHeader />
     <main>
       <slot />
     </main>
-    <LandingSiteFooter />
-    <LandingWhatsAppButton variant="float" label="Falar no WhatsApp — Eleve Imports" />
+    <SiteFooter />
+    <WhatsAppButton variant="float" label="Falar no WhatsApp — Eleve Imports" />
   </div>
 </template>

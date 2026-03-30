@@ -42,11 +42,11 @@ function closeMenu() {
         >
           Entrar
         </NuxtLink>
-        <LandingWhatsAppButton size="sm" />
+        <WhatsAppButton size="sm" />
       </nav>
 
       <div class="flex items-center gap-2 md:hidden">
-        <LandingWhatsAppButton variant="outline" size="sm" class="!px-3" />
+        <WhatsAppButton variant="outline" size="sm" class="!px-3" />
         <button
           type="button"
           class="inline-flex h-11 w-11 items-center justify-center rounded-lg text-zinc-700 hover:bg-zinc-100"
@@ -87,7 +87,7 @@ function closeMenu() {
           Entrar
         </NuxtLink>
         <div class="mt-4">
-          <LandingWhatsAppButton size="md" class="w-full justify-center" />
+          <WhatsAppButton size="md" class="w-full justify-center" />
         </div>
       </div>
     </Transition>

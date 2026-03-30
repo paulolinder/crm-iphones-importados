@@ -26,13 +26,13 @@ useHead({
 
 <template>
   <div>
-    <LandingHeroSection />
-    <LandingAboutSection />
-    <LandingFeaturesSection />
-    <LandingHowItWorksSection />
-    <LandingProductCategoriesSection />
-    <LandingGuaranteeSection />
-    <LandingLocationSection />
-    <LandingCTASection />
+    <HeroSection />
+    <AboutSection />
+    <FeaturesSection />
+    <HowItWorksSection />
+    <ProductCategoriesSection />
+    <GuaranteeSection />
+    <LocationSection />
+    <CTASection />
   </div>
 </template>
